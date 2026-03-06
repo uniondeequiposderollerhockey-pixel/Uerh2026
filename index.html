@@ -23,45 +23,23 @@
             background-image: radial-gradient(circle at 50% -20%, rgba(66,133,244,0.15) 0%, rgba(10,14,23,0) 50%);
         }
 
-        .main-container { width: 100%; max-width: 480px; padding: 20px; text-align: center; }
+        .main-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
         
-        .logo-main { 
-            font-size: 3.5rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; 
-            background: linear-gradient(90deg, #fff, #aaa); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-        }
+        .logo-main { font-size: 3.5rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
 
-        .card { 
-            background-color: var(--bg-card); padding: 25px; border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-        }
+        .card { background-color: var(--bg-card); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
-        .btn-google {
-            background: transparent; color: white; border: none; display: flex;
-            align-items: center; justify-content: center; gap: 12px; width: 100%;
-            padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer;
-            position: relative; z-index: 1;
-        }
+        .btn-google { background: transparent; color: white; border: none; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer; position: relative; z-index: 1; }
+        .btn-google::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 8px; padding: 2px; background: linear-gradient(90deg, var(--color-blue), var(--color-red), var(--color-blue), var(--color-red)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: destination-out; mask-composite: exclude; }
 
-        .btn-google::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 8px; padding: 2px;
-            background: linear-gradient(90deg, var(--color-blue), var(--color-red), var(--color-blue), var(--color-red));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: destination-out; mask-composite: exclude;
-        }
+        .bank-info { background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 0.85rem; }
 
-        .bank-info {
-            background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue);
-            padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 0.85rem;
-        }
-
-        .status-msg { padding: 20px; border-radius: 8px; background: rgba(39, 174, 96, 0.1); border: 1px solid var(--success); color: white; margin-bottom: 20px; }
+        .extra-role-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; }
 
         .hidden { display: none !important; }
         .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; margin-bottom: 12px; box-sizing: border-box; }
-        .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
         .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.65rem; color: white; }
@@ -83,56 +61,78 @@
     </div>
 
     <div id="already-registered" class="card hidden">
-        <div class="status-msg">
-            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+        <div style="padding:20px; border:1px solid var(--success); border-radius:8px;">
+            <div style="font-size: 2rem;">✅</div>
             <strong>¡Ya estás registrado!</strong><br>
-            Tu solicitud está en proceso de revisión.<br>
-            <span id="reg-status" style="display:inline-block; margin-top:10px; font-weight: bold; text-transform: uppercase; color: var(--color-blue);"></span>
+            <span id="reg-status"></span>
         </div>
         <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
     <div id="form-section" class="card hidden">
-        <div id="price-display" style="color: var(--success); font-weight: bold; margin-bottom: 15px; font-size: 1.2rem;">Costo: $1200</div>
+        <div id="price-display" style="color: var(--success); font-weight: bold; margin-bottom: 15px;">Costo: $1200</div>
         
         <div class="bank-info">
             <strong style="color: var(--color-blue)">DATOS PARA EL PAGO:</strong><br>
-            Banco: <strong>Itaú</strong><br>
-            Caja de Ahorro $: <strong>8806679</strong><br>
-            Nombre: <strong>Josué Rojas</strong>
+            BROU Caja de Ahorro $: <strong>001559448-00001</strong><br>
+            Nombre: <strong>Josue Rojas</strong>
         </div>
 
         <form onsubmit="registrar(event)">
             <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
             <input type="tel" id="phone" class="input-field" placeholder="WhatsApp" required>
-            <select id="team" class="input-field" required>
-                <option value="">Seleccionar Equipo</option>
+            
+            <p style="text-align:left; font-size:0.8rem; margin:5px 0; color:var(--color-blue)">REGISTRO PRINCIPAL:</p>
+            <select id="team1" class="input-field" required>
+                <option value="">Equipo</option>
                 <option value="Lobos">Lobos</option><option value="Thunderfast">Thunderfast</option>
                 <option value="Tejones">Tejones</option><option value="Tcp">Tcp</option><option value="Usb">Usb</option>
             </select>
             <div style="display: flex; gap: 10px;">
-                <input type="number" id="shirt" class="input-field" placeholder="Nº" style="flex:1" required>
-                <select id="role" class="input-field" style="flex:2" required>
+                <input type="number" id="shirt1" class="input-field" placeholder="Nº" style="flex:1" required>
+                <select id="role1" class="input-field" style="flex:2" required onchange="toggleExtraMsg()">
                     <option value="Jugador">Jugador</option>
                     <option value="Asistente (A)">Asistente (A)</option>
                     <option value="Capitán (C)">Capitán (C)</option>
                     <option value="Golero 1">Golero 1</option><option value="Golero 2">Golero 2</option><option value="Golero 3">Golero 3</option>
                 </select>
             </div>
-            <div style="text-align:left; margin-bottom:10px">
+
+            <div class="extra-role-box">
+                <label style="cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="hasSecondRole" onchange="toggleSecondRole()"> 
+                    <span id="extra-label">¿También quieres registrarte como Golero?</span>
+                </label>
+
+                <div id="second-role-fields" class="hidden" style="margin-top:10px;">
+                    <select id="team2" class="input-field">
+                        <option value="">Segundo Equipo</option>
+                        <option value="Lobos">Lobos</option><option value="Thunderfast">Thunderfast</option>
+                        <option value="Tejones">Tejones</option><option value="Tcp">Tcp</option><option value="Usb">Usb</option>
+                    </select>
+                    <select id="role2" class="input-field">
+                        <option value="">Selecciona Modalidad/Golero</option>
+                        <option value="Jugador">Jugador</option>
+                        <option value="Golero 1">Golero 1</option><option value="Golero 2">Golero 2</option><option value="Golero 3">Golero 3</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="text-align:left; margin-top:15px;">
                 <label style="font-size:0.7rem; color:var(--text-muted)">FOTO CARNET:</label>
                 <input type="file" id="f1" accept="image/*" class="input-field" required>
                 <label style="font-size:0.7rem; color:var(--text-muted)">COMPROBANTE PAGO:</label>
                 <input type="file" id="f2" accept="image/*" class="input-field" required>
             </div>
+            
             <button type="submit" id="btn-envio" class="btn-submit">Enviar Registro</button>
         </form>
         <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
     <div id="admin-panel" class="card hidden">
-        <h3 style="color: #4285f4;">Panel Admin</h3>
-        <div style="overflow-x: auto;"><table><thead><tr><th>Jugador</th><th>Rol</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
+        <h3 style="color: #4285f4;">Admin UERH</h3>
+        <div style="overflow-x: auto;"><table><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
         <br><button onclick="handleLogout()">Salir</button>
     </div>
 </div>
@@ -157,41 +157,40 @@
         await firebase.auth().signInWithPopup(provider);
     }
 
-    function handleLogout() {
-        currentUID = null; currentEmail = null;
-        firebase.auth().signOut().then(() => location.reload());
+    function handleLogout() { firebase.auth().signOut().then(() => location.reload()); }
+
+    function toggleExtraMsg() {
+        const role1 = document.getElementById('role1').value;
+        const label = document.getElementById('extra-label');
+        if(role1.includes("Golero")) {
+            label.innerText = "¿También quieres registrarte como Jugador?";
+        } else {
+            label.innerText = "¿También quieres registrarte como Golero?";
+        }
+    }
+
+    function toggleSecondRole() {
+        const fields = document.getElementById('second-role-fields');
+        fields.classList.toggle('hidden', !document.getElementById('hasSecondRole').checked);
     }
 
     firebase.auth().onAuthStateChanged(async (user) => {
-        const authView = document.getElementById('auth-section');
-        const formView = document.getElementById('form-section');
-        const adminView = document.getElementById('admin-panel');
-        const regView = document.getElementById('already-registered');
-
         if (user) {
-            currentUID = user.uid;
-            currentEmail = user.email;
-            authView.classList.add('hidden');
-
+            currentUID = user.uid; currentEmail = user.email;
+            document.getElementById('auth-section').classList.add('hidden');
             if (ADMIN_EMAILS.includes(user.email)) {
-                adminView.classList.remove('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
                 cargarAdmin();
             } else {
-                // VERIFICAR SI YA EXISTE EN LA BASE DE DATOS
                 const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
                 if (snap.exists()) {
-                    regView.classList.remove('hidden');
+                    document.getElementById('already-registered').classList.remove('hidden');
                     document.getElementById('reg-status').innerText = "Estado: " + snap.val().estado;
                 } else {
-                    formView.classList.remove('hidden');
+                    document.getElementById('form-section').classList.remove('hidden');
                     document.getElementById('playerName').value = user.displayName || "";
                 }
             }
-        } else {
-            authView.classList.remove('hidden');
-            formView.classList.add('hidden');
-            adminView.classList.add('hidden');
-            regView.classList.add('hidden');
         }
     });
 
@@ -199,13 +198,11 @@
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = (e) => {
-            const img = new Image();
-            img.src = e.target.result;
+            const img = new Image(); img.src = e.target.result;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const max = 400; let w = img.width, h = img.height;
-                if (w > h) { if (w > max) { h *= max/w; w = max; } }
-                else { if (h > max) { w *= max/h; h = max; } }
+                if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
                 canvas.width = w; canvas.height = h;
                 canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                 resolve(canvas.toDataURL('image/jpeg', 0.6));
@@ -216,28 +213,36 @@
     async function registrar(e) {
         e.preventDefault();
         const btn = document.getElementById('btn-envio');
-        if (!currentUID) return alert("Error de sesión.");
-
         btn.disabled = true; btn.innerText = "ENVIANDO...";
         
         try {
-            const fotoC = await resizeImg(document.getElementById('f1').files[0]);
-            const fotoP = await resizeImg(document.getElementById('f2').files[0]);
+            const f1 = document.getElementById('f1').files[0];
+            const f2 = document.getElementById('f2').files[0];
+            const fotoC = await resizeImg(f1);
+            const fotoP = await resizeImg(f2);
+
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirt: document.getElementById('shirt1').value }];
+            
+            if(document.getElementById('hasSecondRole').checked) {
+                roles.push({
+                    team: document.getElementById('team2').value,
+                    role: document.getElementById('role2').value,
+                    shirt: document.getElementById('shirt1').value // Mismo número
+                });
+            }
 
             const datos = {
                 jugadorName: document.getElementById('playerName').value,
-                teamName: document.getElementById('team').value,
-                shirtNum: document.getElementById('shirt').value,
-                role: document.getElementById('role').value,
                 whatsapp: document.getElementById('phone').value,
                 email: currentEmail,
+                roles: roles,
                 fotoCarnet: fotoC,
                 fotoPago: fotoP,
                 estado: "pendiente"
             };
 
             await firebase.database().ref('inscripciones/' + currentUID).set(datos);
-            alert("✅ Registro exitoso.");
+            alert("✅ Registro completo para todos los roles seleccionados.");
             location.reload();
         } catch (err) {
             alert("Error: " + err.message);
@@ -251,9 +256,10 @@
             lista.innerHTML = "";
             snap.forEach(child => {
                 const j = child.val();
+                let rolesHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirt})`).join('<br>');
                 lista.innerHTML += `<tr>
-                    <td>${j.jugadorName}<br><small>${j.teamName}</small></td>
-                    <td>${j.role} #${j.shirtNum}</td>
+                    <td>${j.jugadorName}</td>
+                    <td>${rolesHtml}</td>
                     <td><img src="${j.fotoCarnet}" class="img-table" onclick="window.open(this.src)"> <img src="${j.fotoPago}" class="img-table" onclick="window.open(this.src)"></td>
                     <td><button onclick="aprobar('${child.key}')">${j.estado === 'approved' ? '✅' : 'Ok'}</button></td>
                 </tr>`;
@@ -261,11 +267,8 @@
         });
     }
 
-    async function aprobar(uid) {
-        if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' });
-    }
+    async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
 </script>
 </body>
 </html>
-
 
