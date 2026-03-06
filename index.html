@@ -20,7 +20,6 @@
             font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; 
             background-color: var(--bg-dark); color: var(--text-main);
             display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            background-color: #0a0e17;
             background-image: 
                 radial-gradient(circle at 50% -20%, rgba(66,133,244,0.15) 0%, rgba(10,14,23,0) 50%),
                 url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSI0OSIgdmlld0JveD0iMCAwIDI4IDQ5Ij48cGF0aCBmaWxsPSIjZmZmZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDMiIGQ9Ik0xMy45OSA5LjI1bDEzLjk5IDguMDd2MTYuMTRMMTMuOTkgNDEuNCAwIDMzLjQ2VjE3LjMyek0yOCAxOC40N3YxNi4xNEwxNCA0Mi42OCAwIDM0LjYxVjE4LjQ3bDE0LTguMDd6Ii8+PC9zdmc+');
@@ -29,20 +28,19 @@
         .main-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
         
         .logo-main { 
-            font-size: 4.5rem; font-weight: 900; letter-spacing: 0.1em; margin: 0; 
-            background: linear-gradient(to right, #4285f4 0%, #4285f4 33%, #ffffff 33%, #ffffff 66%, #ea4335 66%, #ea4335 100%);
+            font-size: 3.5rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; 
+            background: linear-gradient(90deg, var(--color-blue) 50%, var(--color-red) 50%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(66, 133, 244, 0.3));
         }
 
-        .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; font-weight: 600; letter-spacing: 2px; }
+        .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
 
         .card { background-color: var(--bg-card); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
         .btn-google { 
             display: flex; align-items: center; justify-content: center; gap: 10px;
             width: 100%; padding: 12px; background: white; color: #000; border: none;
-            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem; margin-top: 10px;
+            border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;
         }
 
         .bank-info { background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue); padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left; font-size: 0.85rem; }
@@ -69,7 +67,6 @@
     <div class="logo-subtext">Unión de Equipos de Roller Hockey</div>
 
     <div id="auth-section" class="card">
-        <p style="margin-bottom: 20px; font-size: 0.9rem;">Bienvenido al Registro Oficial 2026.<br>Inicia sesión para continuar.</p>
         <button class="btn-google" onclick="handleLogin()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/02/2x/google_light.png" width="20">
             Continuar con Google
@@ -78,18 +75,18 @@
 
     <div id="form-section" class="card hidden">
         <div class="bank-info">
-            <strong style="color: var(--color-blue)">PAGO POR TRANSFERENCIA:</strong><br>
+            <strong style="color: var(--color-blue)">DATOS PARA EL PAGO:</strong><br>
             Itaú | C.A. <strong>8806679</strong> | <strong>Josue Rojas</strong>
             <div id="status-pago" class="precio-box"></div>
         </div>
 
         <form id="regForm" onsubmit="registrar(event)">
             <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
-            <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (Ej: 095555555)" required oninput="validatePhone()">
-            <div id="phone-error" class="error-msg">Formato: 09XXXXXXX (9 dígitos)</div>
+            <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (09XXXXXXX)" required oninput="validatePhone()">
+            <div id="phone-error" class="error-msg">Formato: 09XXXXXXX</div>
             
             <div class="extra-section">
-                <h4 style="margin:0 0 10px 0; font-size:0.8rem; color:var(--color-blue); text-transform:uppercase;">Registro Principal</h4>
+                <h4 style="margin:0 0 10px 0; font-size:0.8rem; color:var(--color-blue);">Registro Principal</h4>
                 <select id="team1" class="input-field" required onchange="updateLogic()">
                     <option value="">Seleccionar Equipo</option>
                     <option value="Lobos">Lobos</option><option value="Thunderfast">Thunderfast</option>
@@ -111,7 +108,7 @@
             <div style="text-align:left; margin-top:15px;">
                 <label style="font-size:0.7rem; color:var(--text-muted)">FOTO CARNET:</label>
                 <input type="file" id="f1" accept="image/*" class="input-field" required>
-                <label style="font-size:0.7rem; color:var(--text-muted)">COMPROBANTE PAGO:</label>
+                <label style="font-size:0.7rem; color:var(--text-muted)">COMPROBANTE:</label>
                 <input type="file" id="f2" accept="image/*" class="input-field" required>
             </div>
             
@@ -121,7 +118,7 @@
 
     <div id="admin-panel" class="card hidden">
         <h3 style="color: #4285f4;">Admin UERH</h3>
-        <div style="overflow-x: auto;"><table id="table-admin"><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
+        <div style="overflow-x: auto;"><table><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
         <br><button onclick="handleLogout()" class="input-field">Cerrar Sesión</button>
     </div>
 </div>
@@ -138,7 +135,7 @@
     });
 
     const ADMIN_EMAILS = ["josuerojas@gmail.com", "uniondeequiposderollerhockey@gmail.com"];
-    let currentUID = null; let currentEmail = null;
+    let currentUID = null;
 
     function handleLogin() {
         const provider = new firebase.auth.GoogleAuthProvider();
@@ -149,7 +146,7 @@
 
     firebase.auth().onAuthStateChanged(user => {
         if (user) {
-            currentUID = user.uid; currentEmail = user.email;
+            currentUID = user.uid;
             document.getElementById('auth-section').classList.add('hidden');
             if (ADMIN_EMAILS.includes(user.email)) {
                 document.getElementById('admin-panel').classList.remove('hidden');
@@ -173,13 +170,13 @@
     }
 
     function validatePhone() {
-        const phoneInput = document.getElementById('whatsapp');
-        const pattern = /^09\d{7}$/;
-        const isValid = phoneInput.value === "" || pattern.test(phoneInput.value);
-        document.getElementById('phone-error').style.display = isValid ? 'none' : 'block';
-        return isValid;
+        const p = document.getElementById('whatsapp').value;
+        const valid = p === "" || /^09\d{7}$/.test(p);
+        document.getElementById('phone-error').style.display = valid ? 'none' : 'block';
+        return valid;
     }
 
+    // Lógica de equipos y roles (Restaurada y funcional)
     let extraCount = 0; let selectedGoleros = []; let selectedTeams = [];
 
     function updateLogic() {
@@ -191,9 +188,9 @@
         selectedTeams.push(t);
         if (r.includes("Golero")) {
             selectedGoleros.push(r);
-            addExtraRole("¿Registrar en otro equipo?", "both");
+            addExtraRole("¿Deseas registrarte en otro equipo?", "both");
         } else {
-            addExtraRole("¿Registrar como Golero en otro equipo?", "onlyGolero");
+            addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
         }
     }
 
@@ -208,7 +205,7 @@
             <label style="cursor:pointer; font-size:0.85rem;"><input type="checkbox" onchange="document.getElementById('fields_${extraCount}').classList.toggle('hidden', !this.checked)"> ${label}</label>
             <div id="fields_${extraCount}" class="hidden">
                 <select class="input-field extra-team" id="team_extra_${extraCount}"><option value="">Equipo</option>${teams.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
-                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')"><option value="">Modalidad</option>${type === 'both' ? '<option value="Jugador">Jugador</option>' : ''}${goleros.map(g => `<option value="${g}">${g}</option>`).join('')}</select>
+                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')"><option value="">Rol</option>${type === 'both' ? '<option value="Jugador">Jugador</option>' : ''}${goleros.map(g => `<option value="${g}">${g}</option>`).join('')}</select>
             </div>`;
         document.getElementById('extra-container').appendChild(div);
     }
@@ -218,7 +215,7 @@
         if (!sel.value || !t) return;
         selectedTeams.push(t);
         if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
-        if (extraCount < 3) addExtraRole("¿Agregar otro registro?", "both");
+        if (extraCount < 3) addExtraRole("¿Deseas agregar otro?", "both");
     }
 
     const resizeImg = (file) => new Promise(res => {
