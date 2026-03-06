@@ -20,46 +20,46 @@
             font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; 
             background-color: var(--bg-dark); color: var(--text-main);
             display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            /* Fondo con patrón de panal y luces azul/rojo */
+            background-color: #0a0e17;
             background-image: 
-                radial-gradient(circle at 20% 20%, rgba(66,133,244,0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, rgba(234,67,53,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% -20%, rgba(66,133,244,0.15) 0%, rgba(10,14,23,0) 50%),
                 url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOCIgaGVpZ2h0PSI0OSIgdmlld0JveD0iMCAwIDI4IDQ5Ij48cGF0aCBmaWxsPSIjZmZmZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDMiIGQ9Ik0xMy45OSA5LjI1bDEzLjk5IDguMDd2MTYuMTRMMTMuOTkgNDEuNCAwIDMzLjQ2VjE3LjMyek0yOCAxOC40N3YxNi4xNEwxNCA0Mi42OCAwIDM0LjYxVjE4LjQ3bDE0LTguMDd6Ii8+PC9zdmc+');
         }
 
         .main-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
         
-        /* Logo UERH solo Azul y Rojo */
         .logo-main { 
             font-size: 4.5rem; font-weight: 900; letter-spacing: 0.1em; margin: 0; 
-            background: linear-gradient(to right, #4285f4 50%, #ea4335 50%);
+            background: linear-gradient(to right, #4285f4 0%, #4285f4 33%, #ffffff 33%, #ffffff 66%, #ea4335 66%, #ea4335 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(66, 133, 244, 0.4));
+            filter: drop-shadow(0 0 10px rgba(66, 133, 244, 0.3));
         }
 
         .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; font-weight: 600; letter-spacing: 2px; }
 
         .card { background-color: var(--bg-card); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
-        /* Botón Google sobre degradado suave */
         .btn-google { 
             display: flex; align-items: center; justify-content: center; gap: 10px;
             width: 100%; padding: 12px; background: white; color: #000; border: none;
             border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem; margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .bank-info { background: rgba(66, 133, 244, 0.05); border: 1px dashed var(--color-blue); padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left; font-size: 0.85rem; }
+        .bank-info { background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue); padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left; font-size: 0.85rem; }
         .precio-box { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.1rem; }
-        .en-fecha { background: rgba(39, 174, 96, 0.15); color: #4ade80; border: 1px solid #27ae60; }
-        .fuera-fecha { background: rgba(234, 67, 53, 0.15); color: #f87171; border: 1px solid #ea4335; }
+        .en-fecha { background: rgba(39, 174, 96, 0.2); color: #2ecc71; border: 1px solid #27ae60; }
+        .fuera-fecha { background: rgba(234, 67, 53, 0.2); color: #ff8a80; border: 1px solid #ea4335; }
 
-        .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; margin-bottom: 12px; box-sizing: border-box; }
-        .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #ea4335); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
+        .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; margin-bottom: 12px; box-sizing: border-box; }
+        .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
         
-        .extra-section { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; }
+        .extra-section { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; }
         .hidden { display: none !important; }
         .error-msg { color: var(--danger); font-size: 0.7rem; text-align: left; margin-top: -10px; margin-bottom: 10px; display: none; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.65rem; color: white; margin-top: 10px; }
+        th, td { border: 1px solid rgba(255,255,255,0.1); padding: 5px; }
+        .img-table { width: 35px; height: 35px; object-fit: cover; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -69,36 +69,36 @@
     <div class="logo-subtext">Unión de Equipos de Roller Hockey</div>
 
     <div id="auth-section" class="card">
-        <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-muted);">Inicia sesión con Google para acceder al formulario oficial.</p>
+        <p style="margin-bottom: 20px; font-size: 0.9rem;">Bienvenido al Registro Oficial 2026.<br>Inicia sesión para continuar.</p>
         <button class="btn-google" onclick="handleLogin()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/02/2x/google_light.png" width="20">
-            Entrar con Google
+            Continuar con Google
         </button>
     </div>
 
     <div id="form-section" class="card hidden">
         <div class="bank-info">
-            <strong style="color: var(--color-blue)">DATOS DE TRANSFERENCIA:</strong><br>
+            <strong style="color: var(--color-blue)">PAGO POR TRANSFERENCIA:</strong><br>
             Itaú | C.A. <strong>8806679</strong> | <strong>Josue Rojas</strong>
             <div id="status-pago" class="precio-box"></div>
         </div>
 
         <form id="regForm" onsubmit="registrar(event)">
             <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
-            <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (09XXXXXXX)" required oninput="validatePhone()">
-            <div id="phone-error" class="error-msg">Formato inválido (debe ser 09XXXXXXX)</div>
+            <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (Ej: 095555555)" required oninput="validatePhone()">
+            <div id="phone-error" class="error-msg">Formato: 09XXXXXXX (9 dígitos)</div>
             
             <div class="extra-section">
-                <h4 style="margin:0 0 10px 0; font-size:0.8rem; color:var(--color-blue); text-transform:uppercase;">Inscripción Principal</h4>
+                <h4 style="margin:0 0 10px 0; font-size:0.8rem; color:var(--color-blue); text-transform:uppercase;">Registro Principal</h4>
                 <select id="team1" class="input-field" required onchange="updateLogic()">
-                    <option value="">Elegir Equipo</option>
+                    <option value="">Seleccionar Equipo</option>
                     <option value="Lobos">Lobos</option><option value="Thunderfast">Thunderfast</option>
                     <option value="Tejones">Tejones</option><option value="Tcp">Tcp</option><option value="Usb">Usb</option>
                 </select>
                 <div style="display: flex; gap: 10px;">
                     <input type="number" id="shirt1" class="input-field" placeholder="Nº" style="flex:1" required>
                     <select id="role1" class="input-field" style="flex:2" required onchange="updateLogic()">
-                        <option value="">Elegir Rol</option>
+                        <option value="">Seleccionar Rol</option>
                         <option value="Jugador">Jugador</option>
                         <option value="Asistente (A)">Asistente (A)</option><option value="Capitán (C)">Capitán (C)</option>
                         <option value="Golero 1">Golero 1</option><option value="Golero 2">Golero 2</option><option value="Golero 3">Golero 3</option>
@@ -111,22 +111,17 @@
             <div style="text-align:left; margin-top:15px;">
                 <label style="font-size:0.7rem; color:var(--text-muted)">FOTO CARNET:</label>
                 <input type="file" id="f1" accept="image/*" class="input-field" required>
-                <label style="font-size:0.7rem; color:var(--text-muted)">COMPROBANTE:</label>
+                <label style="font-size:0.7rem; color:var(--text-muted)">COMPROBANTE PAGO:</label>
                 <input type="file" id="f2" accept="image/*" class="input-field" required>
             </div>
             
-            <button type="submit" id="btn-envio" class="btn-submit">Confirmar Registro</button>
+            <button type="submit" id="btn-envio" class="btn-submit">Enviar Registro</button>
         </form>
     </div>
 
     <div id="admin-panel" class="card hidden">
-        <h3 style="color: var(--color-blue);">Panel de Administración</h3>
-        <div style="overflow-x: auto;">
-            <table style="width:100%; font-size:0.7rem; color:white; border-collapse:collapse;">
-                <thead><tr style="border-bottom:1px solid #333;"><th>Jugador</th><th>Roles</th><th>Foto</th><th>Acción</th></tr></thead>
-                <tbody id="lista-jugadores"></tbody>
-            </table>
-        </div>
+        <h3 style="color: #4285f4;">Admin UERH</h3>
+        <div style="overflow-x: auto;"><table id="table-admin"><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
         <br><button onclick="handleLogout()" class="input-field">Cerrar Sesión</button>
     </div>
 </div>
@@ -143,7 +138,7 @@
     });
 
     const ADMIN_EMAILS = ["josuerojas@gmail.com", "uniondeequiposderollerhockey@gmail.com"];
-    let currentUID = null;
+    let currentUID = null; let currentEmail = null;
 
     function handleLogin() {
         const provider = new firebase.auth.GoogleAuthProvider();
@@ -154,7 +149,7 @@
 
     firebase.auth().onAuthStateChanged(user => {
         if (user) {
-            currentUID = user.uid;
+            currentUID = user.uid; currentEmail = user.email;
             document.getElementById('auth-section').classList.add('hidden');
             if (ADMIN_EMAILS.includes(user.email)) {
                 document.getElementById('admin-panel').classList.remove('hidden');
@@ -170,17 +165,17 @@
         const ahora = new Date();
         const mes = ahora.getMonth(); const dia = ahora.getDate();
         const box = document.getElementById('status-pago');
-        // Cambio el 15 de abril (Mes 3, día 15)
         if (mes > 3 || (mes === 3 && dia >= 15)) { 
-            box.innerHTML = "MONTO: $1.500 <br> <small>(Recargo fuera de fecha)</small>"; box.className = "precio-box fuera-fecha";
+            box.innerHTML = "MONTO: $1.500 <br> <small>(Desde 15/04)</small>"; box.className = "precio-box fuera-fecha";
         } else {
-            box.innerHTML = "MONTO: $1.200 <br> <small>(Bonificación vigente)</small>"; box.className = "precio-box en-fecha";
+            box.innerHTML = "MONTO: $1.200 <br> <small>(Hasta 14/04)</small>"; box.className = "precio-box en-fecha";
         }
     }
 
     function validatePhone() {
-        const phone = document.getElementById('whatsapp').value;
-        const isValid = phone === "" || /^09\d{7}$/.test(phone);
+        const phoneInput = document.getElementById('whatsapp');
+        const pattern = /^09\d{7}$/;
+        const isValid = phoneInput.value === "" || pattern.test(phoneInput.value);
         document.getElementById('phone-error').style.display = isValid ? 'none' : 'block';
         return isValid;
     }
@@ -213,7 +208,7 @@
             <label style="cursor:pointer; font-size:0.85rem;"><input type="checkbox" onchange="document.getElementById('fields_${extraCount}').classList.toggle('hidden', !this.checked)"> ${label}</label>
             <div id="fields_${extraCount}" class="hidden">
                 <select class="input-field extra-team" id="team_extra_${extraCount}"><option value="">Equipo</option>${teams.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
-                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')"><option value="">Rol</option>${type === 'both' ? '<option value=\"Jugador\">Jugador</option>' : ''}${goleros.map(g => `<option value=\"${g}\">${g}</option>`).join('')}</select>
+                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')"><option value="">Modalidad</option>${type === 'both' ? '<option value="Jugador">Jugador</option>' : ''}${goleros.map(g => `<option value="${g}">${g}</option>`).join('')}</select>
             </div>`;
         document.getElementById('extra-container').appendChild(div);
     }
@@ -223,7 +218,7 @@
         if (!sel.value || !t) return;
         selectedTeams.push(t);
         if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
-        if (extraCount < 3) addExtraRole("¿Agregar más?", "both");
+        if (extraCount < 3) addExtraRole("¿Agregar otro registro?", "both");
     }
 
     const resizeImg = (file) => new Promise(res => {
@@ -247,7 +242,7 @@
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             const roles = [{team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirt: document.getElementById('shirt1').value}];
             document.querySelectorAll('.extra-section').forEach(s => {
-                const cb = s.querySelector('input[type=\"checkbox\"]');
+                const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) roles.push({team: s.querySelector('.extra-team').value, role: s.querySelector('.extra-role').value, shirt: document.getElementById('shirt1').value});
             });
             await firebase.database().ref('inscripciones/' + currentUID).set({
@@ -256,7 +251,7 @@
                 roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente"
             });
             alert("✅ Registro exitoso"); location.reload();
-        } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Confirmar"; }
+        } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Enviar"; }
     }
 
     function cargarAdmin() {
@@ -264,7 +259,7 @@
             const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
             snap.forEach(c => {
                 const j = c.val();
-                l.innerHTML += `<tr style="border-bottom:1px solid #222;"><td>${j.jugadorName}</td><td>${j.roles.map(r => r.team).join(', ')}</td><td><img src="${j.fotoCarnet}" style="width:30px; border-radius:3px;" onclick="window.open(this.src)"></td><td><button onclick="aprobar('${c.key}')">${j.estado === 'approved' ? '✅' : 'Ok'}</button></td></tr>`;
+                l.innerHTML += `<tr><td>${j.jugadorName}</td><td>${j.roles.map(r => r.team+': '+r.role).join('<br>')}</td><td><img src="${j.fotoCarnet}" class="img-table" onclick="window.open(this.src)"></td><td><button onclick="aprobar('${c.key}')">${j.estado === 'approved' ? '✅' : 'Ok'}</button></td></tr>`;
             });
         });
     }
