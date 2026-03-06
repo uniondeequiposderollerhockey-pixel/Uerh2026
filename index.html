@@ -52,12 +52,19 @@
             -webkit-mask-composite: destination-out; mask-composite: exclude;
         }
 
+        .bank-info {
+            background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue);
+            padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 0.85rem;
+        }
+
+        .status-msg { padding: 20px; border-radius: 8px; background: rgba(39, 174, 96, 0.1); border: 1px solid var(--success); color: white; margin-bottom: 20px; }
+
         .hidden { display: none !important; }
-        .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 1rem; box-sizing: border-box; margin-bottom: 12px; }
+        .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; margin-bottom: 12px; box-sizing: border-box; }
         .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-        
         .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.65rem; margin-top: 10px; color: white; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.65rem; color: white; }
         th, td { border: 1px solid rgba(255,255,255,0.1); padding: 5px; text-align: left; }
         .img-table { width: 35px; height: 35px; object-fit: cover; border-radius: 4px; }
     </style>
@@ -75,10 +82,28 @@
         </button>
     </div>
 
+    <div id="already-registered" class="card hidden">
+        <div class="status-msg">
+            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+            <strong>¡Ya estás registrado!</strong><br>
+            Tu solicitud está en proceso de revisión.<br>
+            <span id="reg-status" style="display:inline-block; margin-top:10px; font-weight: bold; text-transform: uppercase; color: var(--color-blue);"></span>
+        </div>
+        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
+    </div>
+
     <div id="form-section" class="card hidden">
-        <div id="price-display" style="color: var(--success); font-weight: bold; margin-bottom: 15px;">Costo: $1200</div>
-        <form id="regForm" onsubmit="registrar(event)">
-            <input type="text" id="playerName" class="input-field" placeholder="Nombre Jugador" required>
+        <div id="price-display" style="color: var(--success); font-weight: bold; margin-bottom: 15px; font-size: 1.2rem;">Costo: $1200</div>
+        
+        <div class="bank-info">
+            <strong style="color: var(--color-blue)">DATOS PARA EL PAGO:</strong><br>
+            Banco: <strong>BROU</strong><br>
+            Caja de Ahorro $: <strong>001559448-00001</strong><br>
+            Nombre: <strong>Josue Rojas</strong>
+        </div>
+
+        <form onsubmit="registrar(event)">
+            <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
             <input type="tel" id="phone" class="input-field" placeholder="WhatsApp" required>
             <select id="team" class="input-field" required>
                 <option value="">Seleccionar Equipo</option>
@@ -106,8 +131,8 @@
     </div>
 
     <div id="admin-panel" class="card hidden">
-        <h3 style="color: #4285f4; font-size: 1rem;">Panel Admin</h3>
-        <div style="overflow-x: auto;"><table id="table-admin"><thead><tr><th>Jugador</th><th>Rol</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
+        <h3 style="color: #4285f4;">Panel Admin</h3>
+        <div style="overflow-x: auto;"><table><thead><tr><th>Jugador</th><th>Rol</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
         <br><button onclick="handleLogout()">Salir</button>
     </div>
 </div>
@@ -123,43 +148,50 @@
         appId: "1:378184888320:web:72183df90850048fc028e5"
     });
 
-    // Variables persistentes durante la carga del formulario
     let currentUID = null;
     let currentEmail = null;
-
-    const costoFinal = (new Date() < new Date(2026, 3, 1)) ? 1200 : 1500;
-    document.getElementById('price-display').innerText = "Costo: $" + costoFinal;
-
     const ADMIN_EMAILS = ["josuerojas@gmail.com", "uniondeequiposderollerhockey@gmail.com"];
 
     async function login() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        try { await firebase.auth().signInWithPopup(provider); } catch(e) { alert("Error al entrar con Google."); }
+        await firebase.auth().signInWithPopup(provider);
     }
 
     function handleLogout() {
-        currentUID = null;
-        currentEmail = null;
-        firebase.auth().signOut();
+        currentUID = null; currentEmail = null;
+        firebase.auth().signOut().then(() => location.reload());
     }
 
-    firebase.auth().onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(async (user) => {
+        const authView = document.getElementById('auth-section');
+        const formView = document.getElementById('form-section');
+        const adminView = document.getElementById('admin-panel');
+        const regView = document.getElementById('already-registered');
+
         if (user) {
             currentUID = user.uid;
             currentEmail = user.email;
-            document.getElementById('auth-section').classList.add('hidden');
+            authView.classList.add('hidden');
+
             if (ADMIN_EMAILS.includes(user.email)) {
-                document.getElementById('admin-panel').classList.remove('hidden');
-                document.getElementById('form-section').classList.add('hidden');
+                adminView.classList.remove('hidden');
                 cargarAdmin();
             } else {
-                document.getElementById('form-section').classList.remove('hidden');
-                document.getElementById('playerName').value = user.displayName || "";
+                // VERIFICAR SI YA EXISTE EN LA BASE DE DATOS
+                const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
+                if (snap.exists()) {
+                    regView.classList.remove('hidden');
+                    document.getElementById('reg-status').innerText = "Estado: " + snap.val().estado;
+                } else {
+                    formView.classList.remove('hidden');
+                    document.getElementById('playerName').value = user.displayName || "";
+                }
             }
         } else {
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('form-section').classList.add('hidden');
-            document.getElementById('admin-panel').classList.add('hidden');
+            authView.classList.remove('hidden');
+            formView.classList.add('hidden');
+            adminView.classList.add('hidden');
+            regView.classList.add('hidden');
         }
     });
 
@@ -184,25 +216,13 @@
     async function registrar(e) {
         e.preventDefault();
         const btn = document.getElementById('btn-envio');
-        
-        // Verificamos las variables locales si Firebase tarda en responder
-        const uid = currentUID || (firebase.auth().currentUser ? firebase.auth().currentUser.uid : null);
-        const email = currentEmail || (firebase.auth().currentUser ? firebase.auth().currentUser.email : null);
-        
-        if (!uid) {
-            alert("Sesión no encontrada. Por favor, cierra sesión y vuelve a entrar.");
-            return;
-        }
+        if (!currentUID) return alert("Error de sesión.");
 
-        btn.disabled = true; btn.innerText = "PROCESANDO IMÁGENES...";
+        btn.disabled = true; btn.innerText = "ENVIANDO...";
         
         try {
-            const f1 = document.getElementById('f1').files[0];
-            const f2 = document.getElementById('f2').files[0];
-            if(!f1 || !f2) throw new Error("Debes seleccionar ambas fotos.");
-
-            const fotoC = await resizeImg(f1);
-            const fotoP = await resizeImg(f2);
+            const fotoC = await resizeImg(document.getElementById('f1').files[0]);
+            const fotoP = await resizeImg(document.getElementById('f2').files[0]);
 
             const datos = {
                 jugadorName: document.getElementById('playerName').value,
@@ -210,16 +230,15 @@
                 shirtNum: document.getElementById('shirt').value,
                 role: document.getElementById('role').value,
                 whatsapp: document.getElementById('phone').value,
-                email: email,
+                email: currentEmail,
                 fotoCarnet: fotoC,
                 fotoPago: fotoP,
-                estado: "pendiente",
-                timestamp: Date.now()
+                estado: "pendiente"
             };
 
-            await firebase.database().ref('inscripciones/' + uid).set(datos);
-            alert("✅ Registro enviado con éxito.");
-            handleLogout();
+            await firebase.database().ref('inscripciones/' + currentUID).set(datos);
+            alert("✅ Registro exitoso.");
+            location.reload();
         } catch (err) {
             alert("Error: " + err.message);
             btn.disabled = false; btn.innerText = "Enviar Registro";
@@ -235,8 +254,7 @@
                 lista.innerHTML += `<tr>
                     <td>${j.jugadorName}<br><small>${j.teamName}</small></td>
                     <td>${j.role} #${j.shirtNum}</td>
-                    <td><img src="${j.fotoCarnet}" class="img-table" onclick="window.open(this.src)"> 
-                        <img src="${j.fotoPago}" class="img-table" onclick="window.open(this.src)"></td>
+                    <td><img src="${j.fotoCarnet}" class="img-table" onclick="window.open(this.src)"> <img src="${j.fotoPago}" class="img-table" onclick="window.open(this.src)"></td>
                     <td><button onclick="aprobar('${child.key}')">${j.estado === 'approved' ? '✅' : 'Ok'}</button></td>
                 </tr>`;
             });
@@ -244,9 +262,7 @@
     }
 
     async function aprobar(uid) {
-        if(confirm("¿Aprobar inscripción?")) { 
-            await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); 
-        }
+        if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' });
     }
 </script>
 </body>
