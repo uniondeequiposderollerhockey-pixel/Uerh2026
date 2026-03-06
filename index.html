@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.E.R.H. - Registro 2026</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0a0e17; --bg-card: #111622; --text-main: #ffffff;
+            --text-muted: #8b9bb4; --success: #27ae60; --danger: #ea4335;
+            --color-blue: #4285f4; --color-red: #ea4335;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0; background-color: var(--bg-dark); color: var(--text-main);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background-image: radial-gradient(circle at 50% -20%, rgba(66,133,244,0.15) 0%, rgba(10,14,23,0) 50%);
+        }
+
+        .main-container { width: 100%; max-width: 480px; padding: 20px; text-align: center; }
+        
+        .logo-main { 
+            font-size: 3.5rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; 
+            background: linear-gradient(90deg, #fff, #aaa); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
+        .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
+
+        .card { 
+            background-color: var(--bg-card); padding: 25px; border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+        }
+
+        .btn-google {
+            background: transparent; color: white; border: none; display: flex;
+            align-items: center; justify-content: center; gap: 12px; width: 100%;
+            padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer;
+            position: relative; z-index: 1;
+        }
+
+        .btn-google::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 8px; padding: 2px;
+            background: linear-gradient(90deg, var(--color-blue), var(--color-red), var(--color-blue), var(--color-red));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out; mask-composite: exclude;
+        }
+
+        .hidden { display: none !important; }
+        .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 1rem; box-sizing: border-box; margin-bottom: 12px; }
+        .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        
+        .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.65rem; margin-top: 10px; color: white; }
+        th, td { border: 1px solid rgba(255,255,255,0.1); padding: 5px; text-align: left; }
+        .img-table { width: 35px; height: 35px; object-fit: cover; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <h1 class="logo-main">UERH</h1>
+    <div class="logo-subtext">Unión de Equipos de Roller Hockey</div>
+
+    <div id="auth-section" class="card">
+        <h2 style="font-size: 1.1rem; margin-bottom: 20px;">Portal de Registro 2026</h2>
+        <button class="btn-google" onclick="login()">
+            <img src="https://www.google.com/favicon.ico" width="16"> Continuar con Google
+        </button>
+    </div>
+
+    <div id="form-section" class="card hidden">
+        <div id="price-display" style="color: var(--success); font-weight: bold; margin-bottom: 15px;">Costo: $1200</div>
+        <form id="regForm" onsubmit="registrar(event)">
+            <input type="text" id="playerName" class="input-field" placeholder="Nombre Jugador" required>
+            <input type="tel" id="phone" class="input-field" placeholder="WhatsApp" required>
+            <select id="team" class="input-field" required>
+                <option value="">Seleccionar Equipo</option>
+                <option value="Lobos">Lobos</option><option value="Thunderfast">Thunderfast</option>
+                <option value="Tejones">Tejones</option><option value="Tcp">Tcp</option><option value="Usb">Usb</option>
+            </select>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="shirt" class="input-field" placeholder="Nº" style="flex:1" required>
+                <select id="role" class="input-field" style="flex:2" required>
+                    <option value="Jugador">Jugador</option>
+                    <option value="Asistente (A)">Asistente (A)</option>
+                    <option value="Capitán (C)">Capitán (C)</option>
+                    <option value="Golero 1">Golero 1</option><option value="Golero 2">Golero 2</option><option value="Golero 3">Golero 3</option>
+                </select>
+            </div>
+            <div style="text-align:left; margin-bottom:10px">
+                <label style="font-size:0.7rem; color:var(--text-muted)">FOTO CARNET:</label>
+                <input type="file" id="f1" accept="image/*" class="input-field" required>
+                <label style="font-size:0.7rem; color:var(--text-muted)">COMPROBANTE PAGO:</label>
+                <input type="file" id="f2" accept="image/*" class="input-field" required>
+            </div>
+            <button type="submit" id="btn-envio" class="btn-submit">Enviar Registro</button>
+        </form>
+        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
+    </div>
+
+    <div id="admin-panel" class="card hidden">
+        <h3 style="color: #4285f4; font-size: 1rem;">Panel Admin</h3>
+        <div style="overflow-x: auto;"><table id="table-admin"><thead><tr><th>Jugador</th><th>Rol</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table></div>
+        <br><button onclick="handleLogout()">Salir</button>
+    </div>
+</div>
+
+<script>
+    firebase.initializeApp({
+        apiKey: "AIzaSyCREXn3CyGfcSJlOLYn79vvUbgsTs4tc6c",
+        authDomain: "uerh-t2026.firebaseapp.com",
+        databaseURL: "https://uerh-t2026-default-rtdb.firebaseio.com",
+        projectId: "uerh-t2026",
+        storageBucket: "uerh-t2026.firebasestorage.app",
+        messagingSenderId: "378184888320",
+        appId: "1:378184888320:web:72183df90850048fc028e5"
+    });
+
+    // Variables persistentes durante la carga del formulario
+    let currentUID = null;
+    let currentEmail = null;
+
+    const costoFinal = (new Date() < new Date(2026, 3, 1)) ? 1200 : 1500;
+    document.getElementById('price-display').innerText = "Costo: $" + costoFinal;
+
+    const ADMIN_EMAILS = ["josuerojas@gmail.com", "uniondeequiposderollerhockey@gmail.com"];
+
+    async function login() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try { await firebase.auth().signInWithPopup(provider); } catch(e) { alert("Error al entrar con Google."); }
+    }
+
+    function handleLogout() {
+        currentUID = null;
+        currentEmail = null;
+        firebase.auth().signOut();
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            currentUID = user.uid;
+            currentEmail = user.email;
+            document.getElementById('auth-section').classList.add('hidden');
+            if (ADMIN_EMAILS.includes(user.email)) {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('form-section').classList.add('hidden');
+                cargarAdmin();
+            } else {
+                document.getElementById('form-section').classList.remove('hidden');
+                document.getElementById('playerName').value = user.displayName || "";
+            }
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+    });
+
+    const resizeImg = (file) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const max = 400; let w = img.width, h = img.height;
+                if (w > h) { if (w > max) { h *= max/w; w = max; } }
+                else { if (h > max) { w *= max/h; h = max; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(canvas.toDataURL('image/jpeg', 0.6));
+            };
+        };
+    });
+
+    async function registrar(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-envio');
+        
+        // Verificamos las variables locales si Firebase tarda en responder
+        const uid = currentUID || (firebase.auth().currentUser ? firebase.auth().currentUser.uid : null);
+        const email = currentEmail || (firebase.auth().currentUser ? firebase.auth().currentUser.email : null);
+        
+        if (!uid) {
+            alert("Sesión no encontrada. Por favor, cierra sesión y vuelve a entrar.");
+            return;
+        }
+
+        btn.disabled = true; btn.innerText = "PROCESANDO IMÁGENES...";
+        
+        try {
+            const f1 = document.getElementById('f1').files[0];
+            const f2 = document.getElementById('f2').files[0];
+            if(!f1 || !f2) throw new Error("Debes seleccionar ambas fotos.");
+
+            const fotoC = await resizeImg(f1);
+            const fotoP = await resizeImg(f2);
+
+            const datos = {
+                jugadorName: document.getElementById('playerName').value,
+                teamName: document.getElementById('team').value,
+                shirtNum: document.getElementById('shirt').value,
+                role: document.getElementById('role').value,
+                whatsapp: document.getElementById('phone').value,
+                email: email,
+                fotoCarnet: fotoC,
+                fotoPago: fotoP,
+                estado: "pendiente",
+                timestamp: Date.now()
+            };
+
+            await firebase.database().ref('inscripciones/' + uid).set(datos);
+            alert("✅ Registro enviado con éxito.");
+            handleLogout();
+        } catch (err) {
+            alert("Error: " + err.message);
+            btn.disabled = false; btn.innerText = "Enviar Registro";
+        }
+    }
+
+    function cargarAdmin() {
+        firebase.database().ref('inscripciones').on('value', snap => {
+            const lista = document.getElementById('lista-jugadores');
+            lista.innerHTML = "";
+            snap.forEach(child => {
+                const j = child.val();
+                lista.innerHTML += `<tr>
+                    <td>${j.jugadorName}<br><small>${j.teamName}</small></td>
+                    <td>${j.role} #${j.shirtNum}</td>
+                    <td><img src="${j.fotoCarnet}" class="img-table" onclick="window.open(this.src)"> 
+                        <img src="${j.fotoPago}" class="img-table" onclick="window.open(this.src)"></td>
+                    <td><button onclick="aprobar('${child.key}')">${j.estado === 'approved' ? '✅' : 'Ok'}</button></td>
+                </tr>`;
+            });
+        });
+    }
+
+    async function aprobar(uid) {
+        if(confirm("¿Aprobar inscripción?")) { 
+            await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); 
+        }
+    }
+</script>
+</body>
+</html>
