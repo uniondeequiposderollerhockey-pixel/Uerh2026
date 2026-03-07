@@ -44,7 +44,6 @@
         }
 
         .bank-info { background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue); padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left; font-size: 0.85rem; }
-        
         .precio-box { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.1rem; }
         .en-fecha { background: rgba(39, 174, 96, 0.2); color: #2ecc71; border: 1px solid #27ae60; }
         .fuera-fecha { background: rgba(234, 67, 53, 0.2); color: #ff8a80; border: 1px solid #ea4335; }
@@ -55,7 +54,6 @@
         .hidden { display: none !important; }
         
         .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 0.9rem; }
-        .input-field.error { border-color: var(--danger); }
         .error-msg { color: var(--danger); font-size: 0.7rem; text-align: left; margin-top: -10px; margin-bottom: 10px; display: none; }
         
         .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
@@ -73,6 +71,16 @@
         <button class="btn-google" onclick="login()">
             <img src="https://www.google.com/favicon.ico" width="16"> Continuar con Google
         </button>
+    </div>
+
+    <div id="already-registered" class="card hidden">
+        <div style="padding:20px; border:1px solid var(--success); border-radius:8px;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+            <strong>¡Ya estás registrado!</strong><br>
+            <span>Tu solicitud está en revisión.</span><br>
+            <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
+        </div>
+        <div class="logout-link" onclick="handleLogout()">Cerrar sesión e ingresar con otro usuario</div>
     </div>
 
     <div id="form-section" class="card hidden">
@@ -147,7 +155,6 @@
     let selectedGoleros = []; 
     let selectedTeams = [];
 
-    // --- NOTIFICACIÓN A MAKE ---
     function avisarNuevoRegistro(datos) {
         const urlMake = "https://hook.us2.make.com/tnzwhobq9ir8syhbi3ckv0jyskenmefx";
         fetch(urlMake, {
@@ -174,17 +181,22 @@
             currentUID = user.uid; currentEmail = user.email;
             document.getElementById('auth-section').classList.add('hidden');
             const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
-            if (!snap.exists()) {
+            if (snap.exists()) {
+                const datos = snap.val();
+                document.getElementById('already-registered').classList.remove('hidden');
+                document.getElementById('reg-status').innerText = "ESTADO: " + (datos.estado || "PENDIENTE").toUpperCase();
+            } else {
                 document.getElementById('form-section').classList.remove('hidden');
                 document.getElementById('playerName').value = user.displayName || "";
                 configurarPrecios();
-            } else {
-                alert("Ya estás registrado.");
             }
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('already-registered').classList.add('hidden');
         }
     });
 
-    // --- LÓGICA DE ROLES ADICIONALES (GOLEROS/EQUIPOS) ---
     function updateLogic() {
         const t = document.getElementById('team1').value;
         const r = document.getElementById('role1').value;
@@ -234,7 +246,6 @@
         if (extraCount < 3 && selectedTeams.length < 5) addExtraRole("¿Deseas agregar otro registro adicional?", "both");
     }
 
-    // --- RESTO DE FUNCIONES (VALIDACIÓN, IMAGEN, REGISTRO) ---
     function validatePhone() {
         const pattern = /^09\d{7}$/;
         const input = document.getElementById('whatsapp');
@@ -274,7 +285,6 @@
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             const nroCamiseta = document.getElementById('shirt1').value;
-
             const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: nroCamiseta }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
