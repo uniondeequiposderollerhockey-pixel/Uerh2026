@@ -85,7 +85,7 @@
             <span id="reg-msg">Tu solicitud está en revisión.</span><br>
             <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
         </div>
-        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Registrar</div>
+        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Intentar</div>
         <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
@@ -216,12 +216,6 @@
             icon.innerText = "✅";
             regStatus.style.color = "var(--success)";
             msg.innerText = "Tu registro ha sido aprobado correctamente.";
-        } else {
-            // Caso pendiente (valor por defecto)
-            cardBox.style.borderColor = "var(--success)";
-            icon.innerText = "✅";
-            regStatus.style.color = "var(--color-blue)";
-            msg.innerText = "Tu solicitud está en revisión.";
         }
     }
 
@@ -326,26 +320,59 @@
     });
 
     async function registrar(e) {
-        e.preventDefault(); if (!validatePhone()) return;
-        const btn = document.getElementById('btn-envio'); btn.disabled = true; btn.innerText = "ENVIANDO...";
+        e.preventDefault(); 
+        if (!validatePhone()) return;
+
+        // Capturamos el número una sola vez al inicio para que no se pierda
+        const shirtVal = document.getElementById('shirt1').value;
+
+        const btn = document.getElementById('btn-envio'); 
+        btn.disabled = true; 
+        btn.innerText = "ENVIANDO...";
+
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
-            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirt: document.getElementById('shirt1').value }];
+            
+            // Creamos la lista de roles asegurando que el número capturado se use en todos
+            const roles = [{ 
+                team: document.getElementById('team1').value, 
+                role: document.getElementById('role1').value, 
+                shirt: shirtVal 
+            }];
+
             document.querySelectorAll('.extra-section').forEach(s => {
                 const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) {
-                    const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirt: document.getElementById('shirt1').value });
+                    const t = s.querySelector('.extra-team').value; 
+                    const r = s.querySelector('.extra-role').value;
+                    if(t && r) {
+                        roles.push({ 
+                            team: t, 
+                            role: r, 
+                            shirt: shirtVal 
+                        });
+                    }
                 }
             });
+
             await firebase.database().ref('inscripciones/' + currentUID).set({
                 jugadorName: document.getElementById('playerName').value,
                 whatsapp: document.getElementById('whatsapp').value,
-                email: currentEmail, roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente"
+                email: currentEmail, 
+                roles: roles, 
+                fotoCarnet: fC, 
+                fotoPago: fP, 
+                estado: "pendiente"
             });
-            alert("✅ Registro completo."); location.reload();
-        } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Enviar Registro"; }
+
+            alert("✅ Registro completo."); 
+            location.reload();
+        } catch (err) { 
+            alert("Error: " + err.message); 
+            btn.disabled = false; 
+            btn.innerText = "Enviar Registro"; 
+        }
     }
 
     function cargarAdmin() {
@@ -359,11 +386,11 @@
                     <td>${j.jugadorName}</td>
                     <td>${rHtml}</td>
                     <td>
-                        <img src="${j.fotoCarnet}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
-                        <img src="${j.fotoPago}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
+                        <img src="${j.fotoCarnet}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)">
+                        <img src="${j.fotoPago}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)">
                     </td>
                     <td>
-                        <button onclick="aprobar('${child.key}')" style="margin-right:5px; cursor:pointer;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
+                        <button onclick="aprobar('${child.key}')" style="margin-right:5px;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
                         <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white; border:none; border-radius:3px; cursor:pointer; width:25px;">X</button>
                     </td>
                 </tr>`;
