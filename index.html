@@ -60,9 +60,6 @@
         
         .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
         .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; text-decoration: underline; }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 0.65rem; color: white; margin-top: 10px; }
-        th, td { border: 1px solid rgba(255,255,255,0.1); padding: 5px; text-align: left; }
     </style>
 </head>
 <body>
@@ -78,23 +75,18 @@
         </button>
     </div>
 
-    <div id="already-registered" class="card hidden">
-        <div id="status-card-box" style="padding:20px; border:1px solid var(--success); border-radius:8px;">
-            <div id="reg-icon" style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-            <strong id="reg-title">¡Ya estás registrado!</strong><br>
-            <span id="reg-msg">Tu solicitud está en revisión.</span><br>
-            <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
-        </div>
-        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Registrar</div>
-        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
-    </div>
-
     <div id="form-section" class="card hidden">
         <div class="bank-info">
             <strong style="color: var(--color-blue)">DATOS PARA EL PAGO:</strong><br>
             Banco: <strong>Itaú</strong> | Caja de Ahorro: <strong>8806679</strong><br>
             Nombre: <strong>Josué Rojas</strong>
             <div id="status-pago" class="precio-box"></div>
+        </div>
+
+        <div class="nota-importante">
+            <strong>IMPORTANTE:</strong> Solo debes completar el formulario si realizaste el pago y cargaste el comprobante.
+            <br><br>
+            <span style="color: #ffffff;">Recuerda que el costo de $1.200 es válido únicamente para depósitos realizados hasta el 14/04 inclusive.</span>
         </div>
 
         <form id="regForm" onsubmit="registrar(event)">
@@ -151,11 +143,13 @@
 
     let currentUID = null;
     let currentEmail = null;
+    let extraCount = 0; 
+    let selectedGoleros = []; 
+    let selectedTeams = [];
 
-    // --- FUNCIÓN PARA NOTIFICACIÓN WHATSAPP VIA MAKE ---
+    // --- NOTIFICACIÓN A MAKE ---
     function avisarNuevoRegistro(datos) {
         const urlMake = "https://hook.us2.make.com/tnzwhobq9ir8syhbi3ckv0jyskenmefx";
-
         fetch(urlMake, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -165,9 +159,7 @@
                 whatsapp: datos.whatsapp,
                 nro: datos.shirtNum
             })
-        })
-        .then(() => console.log("Notificación enviada a Make"))
-        .catch(err => console.error("Error al notificar a Make:", err));
+        }).catch(err => console.error("Error Make:", err));
     }
 
     async function login() {
@@ -182,19 +174,73 @@
             currentUID = user.uid; currentEmail = user.email;
             document.getElementById('auth-section').classList.add('hidden');
             const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
-            if (snap.exists()) {
-                mostrarEstadoUsuario(snap.val());
-            } else {
+            if (!snap.exists()) {
                 document.getElementById('form-section').classList.remove('hidden');
                 document.getElementById('playerName').value = user.displayName || "";
                 configurarPrecios();
+            } else {
+                alert("Ya estás registrado.");
             }
         }
     });
 
-    function mostrarEstadoUsuario(datos) {
-        document.getElementById('already-registered').classList.remove('hidden');
-        document.getElementById('reg-status').innerText = "ESTADO: " + datos.estado.toUpperCase();
+    // --- LÓGICA DE ROLES ADICIONALES (GOLEROS/EQUIPOS) ---
+    function updateLogic() {
+        const t = document.getElementById('team1').value;
+        const r = document.getElementById('role1').value;
+        const container = document.getElementById('extra-container');
+        container.innerHTML = ""; extraCount = 0; selectedGoleros = []; selectedTeams = [];
+        if (!t || !r) return;
+        selectedTeams.push(t);
+        if (r.includes("Golero")) {
+            selectedGoleros.push(r);
+            addExtraRole("¿Deseas registrarte en otro equipo?", "both");
+        } else {
+            addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
+        }
+    }
+
+    function addExtraRole(labelTxt, type) {
+        extraCount++;
+        const teams = ["Lobos", "Thunderfast", "Tejones", "Tcp", "Usb"].filter(t => !selectedTeams.includes(t));
+        const goleros = ["Golero 1", "Golero 2", "Golero 3"].filter(g => !selectedGoleros.includes(g));
+        if (teams.length === 0) return;
+        const div = document.createElement('div');
+        div.className = "extra-section";
+        div.innerHTML = `
+            <label style="cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <input type="checkbox" onchange="toggleDiv(this, 'fields_${extraCount}')"> <span>${labelTxt}</span>
+            </label>
+            <div id="fields_${extraCount}" class="hidden">
+                <select class="input-field extra-team" id="team_extra_${extraCount}">
+                    <option value="">Seleccionar Equipo</option>${teams.map(t => `<option value="${t}">${t}</option>`).join('')}
+                </select>
+                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')">
+                    <option value="">Seleccionar Modalidad</option>
+                    ${type === 'both' ? '<option value="Jugador">Jugador</option>' : ''}
+                    ${goleros.map(g => `<option value="${g}">${g}</option>`).join('')}
+                </select>
+            </div>`;
+        document.getElementById('extra-container').appendChild(div);
+    }
+
+    function toggleDiv(cb, id) { document.getElementById(id).classList.toggle('hidden', !cb.checked); }
+
+    function handleSelection(sel, idx, type) {
+        const tVal = document.getElementById(`team_extra_${idx}`).value;
+        if (!sel.value || !tVal) { alert("Selecciona equipo y rol."); sel.value = ""; return; }
+        selectedTeams.push(tVal);
+        if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
+        if (extraCount < 3 && selectedTeams.length < 5) addExtraRole("¿Deseas agregar otro registro adicional?", "both");
+    }
+
+    // --- RESTO DE FUNCIONES (VALIDACIÓN, IMAGEN, REGISTRO) ---
+    function validatePhone() {
+        const pattern = /^09\d{7}$/;
+        const input = document.getElementById('whatsapp');
+        const isValid = input.value === "" || pattern.test(input.value);
+        document.getElementById('phone-error').style.display = isValid ? 'none' : 'block';
+        return isValid;
     }
 
     function configurarPrecios() {
@@ -207,20 +253,13 @@
         }
     }
 
-    function validatePhone() {
-        const pattern = /^09\d{7}$/;
-        const input = document.getElementById('whatsapp');
-        const isValid = input.value === "" || pattern.test(input.value);
-        document.getElementById('phone-error').style.display = isValid ? 'none' : 'block';
-        return isValid;
-    }
-
     const resizeImg = (file) => new Promise((res) => {
         const r = new FileReader(); r.readAsDataURL(file);
         r.onload = (e) => {
             const i = new Image(); i.src = e.target.result;
             i.onload = () => {
-                const c = document.createElement('canvas'); const max = 500; let w = i.width, h = i.height;
+                const c = document.createElement('canvas'); const max = 500;
+                let w = i.width, h = i.height;
                 if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
                 c.width = w; c.height = h; c.getContext('2d').drawImage(i, 0, 0, w, h);
                 res(c.toDataURL('image/jpeg', 0.7));
@@ -236,33 +275,29 @@
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             const nroCamiseta = document.getElementById('shirt1').value;
 
-            const roles = [{ 
-                team: document.getElementById('team1').value, 
-                role: document.getElementById('role1').value, 
-                shirtNum: nroCamiseta 
-            }];
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: nroCamiseta }];
+
+            document.querySelectorAll('.extra-section').forEach(s => {
+                const cb = s.querySelector('input[type="checkbox"]');
+                if(cb && cb.checked) {
+                    const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: nroCamiseta });
+                }
+            });
 
             const misDatos = {
                 jugadorName: document.getElementById('playerName').value,
                 whatsapp: document.getElementById('whatsapp').value,
                 email: currentEmail,
                 shirtNum: nroCamiseta,
-                roles: roles, 
-                fotoCarnet: fC, 
-                fotoPago: fP, 
-                estado: "pendiente"
+                roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente"
             };
 
-            // Guardar en Firebase
             await firebase.database().ref('inscripciones/' + currentUID).set(misDatos);
-
-            // Enviar notificación a Make
             avisarNuevoRegistro(misDatos);
-
             alert("✅ Registro completo."); location.reload();
         } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
     }
 </script>
 </body>
 </html>
-
