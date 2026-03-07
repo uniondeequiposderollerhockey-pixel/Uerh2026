@@ -204,7 +204,7 @@
 
         regStatus.innerText = "ESTADO: " + statusText;
 
-        // CORRECCIÓN 2: Lógica de estado rechazado
+        // Se busca el estado 'rechazado'
         if (datos.estado === 'rechazado') {
             cardBox.style.borderColor = "var(--danger)";
             icon.innerText = "❌";
@@ -217,6 +217,13 @@
             icon.innerText = "✅";
             regStatus.style.color = "var(--success)";
             msg.innerText = "Tu registro ha sido aprobado correctamente.";
+            btnReintentar.classList.add('hidden');
+        } else {
+            // Caso pendiente
+            cardBox.style.borderColor = "var(--color-blue)";
+            icon.innerText = "⏳";
+            regStatus.style.color = "var(--color-blue)";
+            msg.innerText = "Tu solicitud está en revisión.";
             btnReintentar.classList.add('hidden');
         }
     }
@@ -325,7 +332,6 @@
         e.preventDefault(); 
         if (!validatePhone()) return;
 
-        // CORRECCIÓN 1: Captura del número de camiseta
         const shirtNum = document.getElementById('shirt1').value;
 
         const btn = document.getElementById('btn-envio'); 
@@ -336,7 +342,6 @@
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             
-            // Asignamos shirtNum al registro principal
             const roles = [{ 
                 team: document.getElementById('team1').value, 
                 role: document.getElementById('role1').value, 
@@ -352,7 +357,7 @@
                         roles.push({ 
                             team: t, 
                             role: r, 
-                            shirt: shirtNum // Asignamos shirtNum también a los extra
+                            shirt: shirtNum 
                         });
                     }
                 }
@@ -402,6 +407,7 @@
 
     async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
     
+    // CORRECCIÓN: Ahora guarda el estado como 'rechazado' (en español) para que el sistema lo reconozca.
     async function rechazar(uid) { 
         if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
             await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
