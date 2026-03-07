@@ -177,7 +177,7 @@
 
     let currentUID = null;
     let currentEmail = null;
-    const ADMIN_EMAILS = ["josuerojas@gmail.com", "uniondeequiposderollerhockey@gmail.com"];
+    const ADMIN_EMAILS = ["rojjosue@gmail.com", "uniondeequiposderollerhockey@gmail.com"];
 
     async function login() {
         const provider = new firebase.auth.GoogleAuthProvider();
@@ -220,7 +220,7 @@
             icon.innerText = "❌";
             regStatus.style.color = "var(--danger)";
             btnReintentar.classList.remove('hidden');
-        } else if (est === 'aprobado' || est === 'approved') {
+        } else if (est === 'aprobado' || est === 'aprobado') {
             cardBox.style.borderColor = "var(--success)";
             icon.innerText = "✅";
             regStatus.style.color = "var(--success)";
@@ -341,7 +341,7 @@
                         <img src="${j.fotoPago}" class="img-admin" onclick="window.open(this.src)">
                     </td>
                     <td>
-                        <button onclick="aprobar('${child.key}')">${(j.estado === 'aprobado' || j.estado === 'approved') ? '✅' : 'Ok'}</button>
+                        <button onclick="aprobar('${child.key}')">${(j.estado === 'aprobado' || j.estado === 'aprobado') ? '✅' : 'Ok'}</button>
                         <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white; border:none; padding:4px 8px; cursor:pointer;">X</button>
                     </td>
                 </tr>`;
@@ -361,4 +361,3 @@
 </script>
 </body>
 </html>
-
