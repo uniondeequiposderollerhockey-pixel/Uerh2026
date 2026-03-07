@@ -85,7 +85,7 @@
             <span id="reg-msg">Tu solicitud está en revisión.</span><br>
             <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
         </div>
-        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Intentar</div>
+        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Registrar</div>
         <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
@@ -193,7 +193,6 @@
         }
     });
 
-    // Nueva función para manejar cómo el usuario ve su estado
     function mostrarEstadoUsuario(datos) {
         document.getElementById('already-registered').classList.remove('hidden');
         const statusText = datos.estado.toUpperCase();
@@ -217,10 +216,15 @@
             icon.innerText = "✅";
             regStatus.style.color = "var(--success)";
             msg.innerText = "Tu registro ha sido aprobado correctamente.";
+        } else {
+            // Caso pendiente (valor por defecto)
+            cardBox.style.borderColor = "var(--success)";
+            icon.innerText = "✅";
+            regStatus.style.color = "var(--color-blue)";
+            msg.innerText = "Tu solicitud está en revisión.";
         }
     }
 
-    // Función para que el usuario borre su registro rechazado y lo intente de nuevo
     async function borrarYReintentar() {
         if(confirm("¿Deseas eliminar el registro actual y volver a completar el formulario?")) {
             await firebase.database().ref('inscripciones/' + currentUID).remove();
@@ -355,11 +359,11 @@
                     <td>${j.jugadorName}</td>
                     <td>${rHtml}</td>
                     <td>
-                        <img src="${j.fotoCarnet}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)">
-                        <img src="${j.fotoPago}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)">
+                        <img src="${j.fotoCarnet}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
+                        <img src="${j.fotoPago}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
                     </td>
                     <td>
-                        <button onclick="aprobar('${child.key}')" style="margin-right:5px;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
+                        <button onclick="aprobar('${child.key}')" style="margin-right:5px; cursor:pointer;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
                         <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white; border:none; border-radius:3px; cursor:pointer; width:25px;">X</button>
                     </td>
                 </tr>`;
@@ -369,7 +373,6 @@
 
     async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
     
-    // Función de Admin para rechazar
     async function rechazar(uid) { 
         if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
             await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
