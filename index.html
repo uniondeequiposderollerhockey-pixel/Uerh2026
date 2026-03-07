@@ -204,18 +204,20 @@
 
         regStatus.innerText = "ESTADO: " + statusText;
 
+        // CORRECCIÓN 2: Lógica de estado rechazado
         if (datos.estado === 'rechazado') {
             cardBox.style.borderColor = "var(--danger)";
             icon.innerText = "❌";
             regStatus.style.color = "var(--danger)";
             document.getElementById('reg-title').innerText = "Registro Rechazado";
-            msg.innerText = "Tu registro no cumple con los requisitos. Por favor, revisa tus datos o el comprobante.";
+            msg.innerText = "Tu registro no ha sido aceptado. ¿Deseas volver a intentar el registro?";
             btnReintentar.classList.remove('hidden');
         } else if (datos.estado === 'approved') {
             cardBox.style.borderColor = "var(--success)";
             icon.innerText = "✅";
             regStatus.style.color = "var(--success)";
             msg.innerText = "Tu registro ha sido aprobado correctamente.";
+            btnReintentar.classList.add('hidden');
         }
     }
 
@@ -323,8 +325,8 @@
         e.preventDefault(); 
         if (!validatePhone()) return;
 
-        // Capturamos el número una sola vez al inicio para que no se pierda
-        const shirtVal = document.getElementById('shirt1').value;
+        // CORRECCIÓN 1: Captura del número de camiseta
+        const shirtNum = document.getElementById('shirt1').value;
 
         const btn = document.getElementById('btn-envio'); 
         btn.disabled = true; 
@@ -334,11 +336,11 @@
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             
-            // Creamos la lista de roles asegurando que el número capturado se use en todos
+            // Asignamos shirtNum al registro principal
             const roles = [{ 
                 team: document.getElementById('team1').value, 
                 role: document.getElementById('role1').value, 
-                shirt: shirtVal 
+                shirt: shirtNum 
             }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
@@ -350,7 +352,7 @@
                         roles.push({ 
                             team: t, 
                             role: r, 
-                            shirt: shirtVal 
+                            shirt: shirtNum // Asignamos shirtNum también a los extra
                         });
                     }
                 }
