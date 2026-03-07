@@ -97,10 +97,6 @@
             <div id="status-pago" class="precio-box"></div>
         </div>
 
-        <div class="nota-importante">
-            <strong>IMPORTANTE:</strong> Solo debes completar el formulario si realizaste el pago y cargaste el comprobante.
-        </div>
-
         <form id="regForm" onsubmit="registrar(event)">
             <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
             <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (Ej: 095555555)" required oninput="validatePhone()">
@@ -140,14 +136,6 @@
         </form>
         <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
-
-    <div id="admin-panel" class="card hidden">
-        <h3 style="color: #4285f4;">Admin UERH</h3>
-        <div style="overflow-x: auto;">
-            <table><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Acción</th></tr></thead><tbody id="lista-jugadores"></tbody></table>
-        </div>
-        <br><button onclick="handleLogout()" class="input-field">Salir del Panel</button>
-    </div>
 </div>
 
 <script>
@@ -163,7 +151,24 @@
 
     let currentUID = null;
     let currentEmail = null;
-    const ADMIN_EMAILS = ["josuerojas@gmail.com", "uniondeequiposderollerhockey@gmail.com"];
+
+    // --- FUNCIÓN PARA NOTIFICACIÓN WHATSAPP VIA MAKE ---
+    function avisarNuevoRegistro(datos) {
+        const urlMake = "https://hook.us2.make.com/tnzwhobq9ir8syhbi3ckv0jyskenmefx";
+
+        fetch(urlMake, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                jugador: datos.jugadorName,
+                equipo: datos.roles[0].team,
+                whatsapp: datos.whatsapp,
+                nro: datos.shirtNum
+            })
+        })
+        .then(() => console.log("Notificación enviada a Make"))
+        .catch(err => console.error("Error al notificar a Make:", err));
+    }
 
     async function login() {
         const provider = new firebase.auth.GoogleAuthProvider();
@@ -176,139 +181,38 @@
         if (user) {
             currentUID = user.uid; currentEmail = user.email;
             document.getElementById('auth-section').classList.add('hidden');
-            
-            if (ADMIN_EMAILS.includes(user.email)) {
-                document.getElementById('admin-panel').classList.remove('hidden');
-                cargarAdmin();
+            const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
+            if (snap.exists()) {
+                mostrarEstadoUsuario(snap.val());
             } else {
-                const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
-                if (snap.exists()) {
-                    mostrarEstadoUsuario(snap.val());
-                } else {
-                    document.getElementById('form-section').classList.remove('hidden');
-                    document.getElementById('playerName').value = user.displayName || "";
-                    configurarPrecios();
-                }
+                document.getElementById('form-section').classList.remove('hidden');
+                document.getElementById('playerName').value = user.displayName || "";
+                configurarPrecios();
             }
         }
     });
 
     function mostrarEstadoUsuario(datos) {
         document.getElementById('already-registered').classList.remove('hidden');
-        const statusText = datos.estado.toUpperCase();
-        const regStatus = document.getElementById('reg-status');
-        const cardBox = document.getElementById('status-card-box');
-        const icon = document.getElementById('reg-icon');
-        const msg = document.getElementById('reg-msg');
-        const btnReintentar = document.getElementById('btn-reintentar');
-
-        regStatus.innerText = "ESTADO: " + statusText;
-
-        if (datos.estado === 'rechazado') {
-            cardBox.style.borderColor = "var(--danger)";
-            icon.innerText = "❌";
-            regStatus.style.color = "var(--danger)";
-            document.getElementById('reg-title').innerText = "Registro Rechazado";
-            msg.innerText = "Tu registro no cumple con los requisitos. Por favor, revisa tus datos o el comprobante.";
-            btnReintentar.classList.remove('hidden');
-        } else if (datos.estado === 'approved') {
-            cardBox.style.borderColor = "var(--success)";
-            icon.innerText = "✅";
-            regStatus.style.color = "var(--success)";
-            msg.innerText = "Tu registro ha sido aprobado correctamente.";
-        } else {
-            cardBox.style.borderColor = "var(--success)";
-            icon.innerText = "✅";
-            regStatus.style.color = "var(--color-blue)";
-            msg.innerText = "Tu solicitud está en revisión.";
-        }
-    }
-
-    async function borrarYReintentar() {
-        if(confirm("¿Deseas eliminar el registro actual y volver a completar el formulario?")) {
-            await firebase.database().ref('inscripciones/' + currentUID).remove();
-            location.reload();
-        }
+        document.getElementById('reg-status').innerText = "ESTADO: " + datos.estado.toUpperCase();
     }
 
     function configurarPrecios() {
         const ahora = new Date();
-        const mes = ahora.getMonth(); 
-        const dia = ahora.getDate();
         const box = document.getElementById('status-pago');
-        if (mes > 3 || (mes === 3 && dia >= 15)) { 
-            box.innerHTML = "MONTO: $1.500 <br> <small>(Desde 15/04)</small>"; 
-            box.className = "precio-box fuera-fecha";
+        if (ahora.getMonth() > 3 || (ahora.getMonth() === 3 && ahora.getDate() >= 15)) { 
+            box.innerHTML = "MONTO: $1.500"; box.className = "precio-box fuera-fecha";
         } else {
-            box.innerHTML = "MONTO: $1.200 <br> <small>(Hasta 14/04)</small>"; 
-            box.className = "precio-box en-fecha";
+            box.innerHTML = "MONTO: $1.200"; box.className = "precio-box en-fecha";
         }
     }
 
     function validatePhone() {
-        const phoneInput = document.getElementById('whatsapp');
-        const errorDiv = document.getElementById('phone-error');
         const pattern = /^09\d{7}$/;
-        if (phoneInput.value === "" || pattern.test(phoneInput.value)) {
-            errorDiv.style.display = 'none';
-            phoneInput.classList.remove('error');
-            return true;
-        } else {
-            errorDiv.style.display = 'block';
-            phoneInput.classList.add('error');
-            return false;
-        }
-    }
-
-    let extraCount = 0; let selectedGoleros = []; let selectedTeams = [];
-
-    function updateLogic() {
-        const t = document.getElementById('team1').value;
-        const r = document.getElementById('role1').value;
-        const container = document.getElementById('extra-container');
-        container.innerHTML = ""; extraCount = 0; selectedGoleros = []; selectedTeams = [];
-        if (!t || !r) return;
-        selectedTeams.push(t);
-        if (r.includes("Golero")) {
-            selectedGoleros.push(r);
-            addExtraRole("¿Deseas registrarte en otro equipo?", "both");
-        } else {
-            addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
-        }
-    }
-
-    function addExtraRole(labelTxt, type) {
-        extraCount++;
-        const teams = ["Lobos", "Thunderfast", "Tejones", "Tcp", "Usb"].filter(t => !selectedTeams.includes(t));
-        const goleros = ["Golero 1", "Golero 2", "Golero 3"].filter(g => !selectedGoleros.includes(g));
-        if (teams.length === 0) return;
-        const div = document.createElement('div');
-        div.className = "extra-section";
-        div.innerHTML = `
-            <label style="cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                <input type="checkbox" onchange="toggleDiv(this, 'fields_${extraCount}')"> <span>${labelTxt}</span>
-            </label>
-            <div id="fields_${extraCount}" class="hidden">
-                <select class="input-field extra-team" id="team_extra_${extraCount}">
-                    <option value="">Seleccionar Equipo</option>${teams.map(t => `<option value="${t}">${t}</option>`).join('')}
-                </select>
-                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')">
-                    <option value="">Seleccionar Modalidad</option>
-                    ${type === 'both' ? '<option value="Jugador">Jugador</option>' : ''}
-                    ${goleros.map(g => `<option value="${g}">${g}</option>`).join('')}
-                </select>
-            </div>`;
-        document.getElementById('extra-container').appendChild(div);
-    }
-
-    function toggleDiv(cb, id) { document.getElementById(id).classList.toggle('hidden', !cb.checked); }
-
-    function handleSelection(sel, idx, type) {
-        const tVal = document.getElementById(`team_extra_${idx}`).value;
-        if (!sel.value || !tVal) { alert("Selecciona equipo y rol."); sel.value = ""; return; }
-        selectedTeams.push(tVal);
-        if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
-        if (extraCount < 3 && selectedTeams.length < 5) addExtraRole("¿Deseas agregar otro registro adicional?", "both");
+        const input = document.getElementById('whatsapp');
+        const isValid = input.value === "" || pattern.test(input.value);
+        document.getElementById('phone-error').style.display = isValid ? 'none' : 'block';
+        return isValid;
     }
 
     const resizeImg = (file) => new Promise((res) => {
@@ -330,73 +234,33 @@
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
-            
-            // Capturamos el número de camiseta para usarlo en todos los roles
             const nroCamiseta = document.getElementById('shirt1').value;
 
-            // Iniciamos el array de roles con shirtNum incluido
             const roles = [{ 
                 team: document.getElementById('team1').value, 
                 role: document.getElementById('role1').value, 
                 shirtNum: nroCamiseta 
             }];
 
-            // Recorremos secciones extra y agregamos shirtNum a cada rol
-            document.querySelectorAll('.extra-section').forEach(s => {
-                const cb = s.querySelector('input[type="checkbox"]');
-                if(cb && cb.checked) {
-                    const t = s.querySelector('.extra-team').value; 
-                    const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirtNum: nroCamiseta });
-                }
-            });
-
-            // Guardamos en Firebase incluyendo shirtNum en la RAÍZ y en ROLES
-            await firebase.database().ref('inscripciones/' + currentUID).set({
+            const misDatos = {
                 jugadorName: document.getElementById('playerName').value,
                 whatsapp: document.getElementById('whatsapp').value,
                 email: currentEmail,
-                shirtNum: nroCamiseta, // <--- Guardado en raíz para compatibilidad con edición
+                shirtNum: nroCamiseta,
                 roles: roles, 
                 fotoCarnet: fC, 
                 fotoPago: fP, 
                 estado: "pendiente"
-            });
+            };
+
+            // Guardar en Firebase
+            await firebase.database().ref('inscripciones/' + currentUID).set(misDatos);
+
+            // Enviar notificación a Make
+            avisarNuevoRegistro(misDatos);
 
             alert("✅ Registro completo."); location.reload();
-        } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Enviar Registro"; }
-    }
-
-    function cargarAdmin() {
-        firebase.database().ref('inscripciones').on('value', snap => {
-            const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
-            snap.forEach(child => {
-                const j = child.val();
-                // Mostramos shirtNum desde el array de roles
-                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum || 'S/N'})`).join('<br>');
-                l.innerHTML += `
-                <tr>
-                    <td>${j.jugadorName}</td>
-                    <td>${rHtml}</td>
-                    <td>
-                        <img src="${j.fotoCarnet}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
-                        <img src="${j.fotoPago}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
-                    </td>
-                    <td>
-                        <button onclick="aprobar('${child.key}')" style="margin-right:5px; cursor:pointer;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
-                        <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white; border:none; border-radius:3px; cursor:pointer; width:25px;">X</button>
-                    </td>
-                </tr>`;
-            });
-        });
-    }
-
-    async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
-    
-    async function rechazar(uid) { 
-        if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
-            await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
-        }
+        } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
     }
 </script>
 </body>
