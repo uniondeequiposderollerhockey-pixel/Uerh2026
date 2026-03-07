@@ -45,7 +45,6 @@
 
         .bank-info { background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue); padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left; font-size: 0.85rem; }
         
-        /* Estilos para el cuadro de precio dinámico */
         .precio-box { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.1rem; }
         .en-fecha { background: rgba(39, 174, 96, 0.2); color: #2ecc71; border: 1px solid #27ae60; }
         .fuera-fecha { background: rgba(234, 67, 53, 0.2); color: #ff8a80; border: 1px solid #ea4335; }
@@ -80,12 +79,13 @@
     </div>
 
     <div id="already-registered" class="card hidden">
-        <div style="padding:20px; border:1px solid var(--success); border-radius:8px;">
-            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-            <strong>¡Ya estás registrado!</strong><br>
-            Tu solicitud está en revisión.<br>
+        <div id="status-card-box" style="padding:20px; border:1px solid var(--success); border-radius:8px;">
+            <div id="reg-icon" style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+            <strong id="reg-title">¡Ya estás registrado!</strong><br>
+            <span id="reg-msg">Tu solicitud está en revisión.</span><br>
             <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
         </div>
+        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Intentar</div>
         <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
@@ -144,7 +144,7 @@
     <div id="admin-panel" class="card hidden">
         <h3 style="color: #4285f4;">Admin UERH</h3>
         <div style="overflow-x: auto;">
-            <table><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Ok</th></tr></thead><tbody id="lista-jugadores"></tbody></table>
+            <table><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Acción</th></tr></thead><tbody id="lista-jugadores"></tbody></table>
         </div>
         <br><button onclick="handleLogout()" class="input-field">Salir del Panel</button>
     </div>
@@ -183,8 +183,7 @@
             } else {
                 const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
                 if (snap.exists()) {
-                    document.getElementById('already-registered').classList.remove('hidden');
-                    document.getElementById('reg-status').innerText = "ESTADO: " + snap.val().estado.toUpperCase();
+                    mostrarEstadoUsuario(snap.val());
                 } else {
                     document.getElementById('form-section').classList.remove('hidden');
                     document.getElementById('playerName').value = user.displayName || "";
@@ -194,14 +193,46 @@
         }
     });
 
-    // Función de Precios Dinámicos
+    // Nueva función para manejar cómo el usuario ve su estado
+    function mostrarEstadoUsuario(datos) {
+        document.getElementById('already-registered').classList.remove('hidden');
+        const statusText = datos.estado.toUpperCase();
+        const regStatus = document.getElementById('reg-status');
+        const cardBox = document.getElementById('status-card-box');
+        const icon = document.getElementById('reg-icon');
+        const msg = document.getElementById('reg-msg');
+        const btnReintentar = document.getElementById('btn-reintentar');
+
+        regStatus.innerText = "ESTADO: " + statusText;
+
+        if (datos.estado === 'rechazado') {
+            cardBox.style.borderColor = "var(--danger)";
+            icon.innerText = "❌";
+            regStatus.style.color = "var(--danger)";
+            document.getElementById('reg-title').innerText = "Registro Rechazado";
+            msg.innerText = "Tu registro no cumple con los requisitos. Por favor, revisa tus datos o el comprobante.";
+            btnReintentar.classList.remove('hidden');
+        } else if (datos.estado === 'approved') {
+            cardBox.style.borderColor = "var(--success)";
+            icon.innerText = "✅";
+            regStatus.style.color = "var(--success)";
+            msg.innerText = "Tu registro ha sido aprobado correctamente.";
+        }
+    }
+
+    // Función para que el usuario borre su registro rechazado y lo intente de nuevo
+    async function borrarYReintentar() {
+        if(confirm("¿Deseas eliminar el registro actual y volver a completar el formulario?")) {
+            await firebase.database().ref('inscripciones/' + currentUID).remove();
+            location.reload();
+        }
+    }
+
     function configurarPrecios() {
         const ahora = new Date();
         const mes = ahora.getMonth(); 
         const dia = ahora.getDate();
         const box = document.getElementById('status-pago');
-        
-        // Abril es mes 3 (0-indexado). El 15/04 en adelante cambia el precio.
         if (mes > 3 || (mes === 3 && dia >= 15)) { 
             box.innerHTML = "MONTO: $1.500 <br> <small>(Desde 15/04)</small>"; 
             box.className = "precio-box fuera-fecha";
@@ -319,12 +350,31 @@
             snap.forEach(child => {
                 const j = child.val();
                 let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirt})`).join('<br>');
-                l.innerHTML += `<tr><td>${j.jugadorName}</td><td>${rHtml}</td><td><img src="${j.fotoCarnet}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)"> <img src="${j.fotoPago}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)"></td><td><button onclick="aprobar('${child.key}')">${j.estado === 'approved' ? '✅' : 'Ok'}</button></td></tr>`;
+                l.innerHTML += `
+                <tr>
+                    <td>${j.jugadorName}</td>
+                    <td>${rHtml}</td>
+                    <td>
+                        <img src="${j.fotoCarnet}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)">
+                        <img src="${j.fotoPago}" style="width:35px; border-radius:4px;" onclick="window.open(this.src)">
+                    </td>
+                    <td>
+                        <button onclick="aprobar('${child.key}')" style="margin-right:5px;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
+                        <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white; border:none; border-radius:3px; cursor:pointer; width:25px;">X</button>
+                    </td>
+                </tr>`;
             });
         });
     }
 
     async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
+    
+    // Función de Admin para rechazar
+    async function rechazar(uid) { 
+        if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
+            await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
+        }
+    }
 </script>
 </body>
 </html>
