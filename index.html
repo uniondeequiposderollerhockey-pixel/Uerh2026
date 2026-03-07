@@ -330,8 +330,7 @@
         e.preventDefault(); 
         if (!validatePhone()) return;
 
-        // --- CORRECCIÓN CLAVE ---
-        // Capturamos el valor y lo guardamos con el nombre shirtNum
+        // Capturamos el número como shirtNum
         const shirtNum = document.getElementById('shirt1').value;
 
         const btn = document.getElementById('btn-envio'); 
@@ -342,11 +341,10 @@
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             
-            // Aquí asignamos shirtNum al registro principal
             const roles = [{ 
                 team: document.getElementById('team1').value, 
                 role: document.getElementById('role1').value, 
-                shirtNum: shirtNum // Guardado explícitamente como shirtNum
+                shirtNum: shirtNum 
             }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
@@ -358,7 +356,7 @@
                         roles.push({ 
                             team: t, 
                             role: r, 
-                            shirtNum: shirtNum // Guardado explícitamente en los extra
+                            shirtNum: shirtNum 
                         });
                     }
                 }
@@ -388,7 +386,6 @@
             const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
             snap.forEach(child => {
                 const j = child.val();
-                // Actualizado para leer shirtNum en la tabla del admin
                 let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum || r.shirt})`).join('<br>');
                 l.innerHTML += `
                 <tr>
@@ -409,6 +406,7 @@
 
     async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
     
+    // CORRECCIÓN FINAL: Aquí es donde se guardaba REJECTED, ahora guarda 'rechazado'
     async function rechazar(uid) { 
         if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
             await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
