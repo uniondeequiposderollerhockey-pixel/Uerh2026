@@ -204,7 +204,6 @@
 
         regStatus.innerText = "ESTADO: " + statusText;
 
-        // Se busca el estado 'rechazado'
         if (datos.estado === 'rechazado') {
             cardBox.style.borderColor = "var(--danger)";
             icon.innerText = "❌";
@@ -219,7 +218,6 @@
             msg.innerText = "Tu registro ha sido aprobado correctamente.";
             btnReintentar.classList.add('hidden');
         } else {
-            // Caso pendiente
             cardBox.style.borderColor = "var(--color-blue)";
             icon.innerText = "⏳";
             regStatus.style.color = "var(--color-blue)";
@@ -332,6 +330,8 @@
         e.preventDefault(); 
         if (!validatePhone()) return;
 
+        // --- CORRECCIÓN CLAVE ---
+        // Capturamos el valor y lo guardamos con el nombre shirtNum
         const shirtNum = document.getElementById('shirt1').value;
 
         const btn = document.getElementById('btn-envio'); 
@@ -342,10 +342,11 @@
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             
+            // Aquí asignamos shirtNum al registro principal
             const roles = [{ 
                 team: document.getElementById('team1').value, 
                 role: document.getElementById('role1').value, 
-                shirt: shirtNum 
+                shirtNum: shirtNum // Guardado explícitamente como shirtNum
             }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
@@ -357,7 +358,7 @@
                         roles.push({ 
                             team: t, 
                             role: r, 
-                            shirt: shirtNum 
+                            shirtNum: shirtNum // Guardado explícitamente en los extra
                         });
                     }
                 }
@@ -387,7 +388,8 @@
             const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
             snap.forEach(child => {
                 const j = child.val();
-                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirt})`).join('<br>');
+                // Actualizado para leer shirtNum en la tabla del admin
+                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum || r.shirt})`).join('<br>');
                 l.innerHTML += `
                 <tr>
                     <td>${j.jugadorName}</td>
@@ -407,7 +409,6 @@
 
     async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
     
-    // CORRECCIÓN: Ahora guarda el estado como 'rechazado' (en español) para que el sistema lo reconozca.
     async function rechazar(uid) { 
         if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
             await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
