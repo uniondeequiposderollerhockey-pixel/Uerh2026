@@ -217,7 +217,6 @@
             regStatus.style.color = "var(--success)";
             msg.innerText = "Tu registro ha sido aprobado correctamente.";
         } else {
-            // Caso pendiente (valor por defecto)
             cardBox.style.borderColor = "var(--success)";
             icon.innerText = "✅";
             regStatus.style.color = "var(--color-blue)";
@@ -331,12 +330,14 @@
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
-            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirt: document.getElementById('shirt1').value }];
+            // Se actualizó 'shirt' a 'shirtNum'
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: document.getElementById('shirt1').value }];
             document.querySelectorAll('.extra-section').forEach(s => {
                 const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) {
                     const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirt: document.getElementById('shirt1').value });
+                    // Se actualizó 'shirt' a 'shirtNum'
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: document.getElementById('shirt1').value });
                 }
             });
             await firebase.database().ref('inscripciones/' + currentUID).set({
@@ -353,7 +354,8 @@
             const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
             snap.forEach(child => {
                 const j = child.val();
-                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirt})`).join('<br>');
+                // Se actualizó el mapeo para usar 'shirtNum'
+                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum})`).join('<br>');
                 l.innerHTML += `
                 <tr>
                     <td>${j.jugadorName}</td>
