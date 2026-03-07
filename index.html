@@ -330,21 +330,39 @@
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
-            // Se actualizó 'shirt' a 'shirtNum'
-            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: document.getElementById('shirt1').value }];
+            
+            // Capturamos el número de camiseta para usarlo en todos los roles
+            const nroCamiseta = document.getElementById('shirt1').value;
+
+            // Iniciamos el array de roles con shirtNum incluido
+            const roles = [{ 
+                team: document.getElementById('team1').value, 
+                role: document.getElementById('role1').value, 
+                shirtNum: nroCamiseta 
+            }];
+
+            // Recorremos secciones extra y agregamos shirtNum a cada rol
             document.querySelectorAll('.extra-section').forEach(s => {
                 const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) {
-                    const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
-                    // Se actualizó 'shirt' a 'shirtNum'
-                    if(t && r) roles.push({ team: t, role: r, shirtNum: document.getElementById('shirt1').value });
+                    const t = s.querySelector('.extra-team').value; 
+                    const r = s.querySelector('.extra-role').value;
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: nroCamiseta });
                 }
             });
+
+            // Guardamos en Firebase incluyendo shirtNum en la RAÍZ y en ROLES
             await firebase.database().ref('inscripciones/' + currentUID).set({
                 jugadorName: document.getElementById('playerName').value,
                 whatsapp: document.getElementById('whatsapp').value,
-                email: currentEmail, roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente"
+                email: currentEmail,
+                shirtNum: nroCamiseta, // <--- Guardado en raíz para compatibilidad con edición
+                roles: roles, 
+                fotoCarnet: fC, 
+                fotoPago: fP, 
+                estado: "pendiente"
             });
+
             alert("✅ Registro completo."); location.reload();
         } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Enviar Registro"; }
     }
@@ -354,8 +372,8 @@
             const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
             snap.forEach(child => {
                 const j = child.val();
-                // Se actualizó el mapeo para usar 'shirtNum'
-                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum})`).join('<br>');
+                // Mostramos shirtNum desde el array de roles
+                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum || 'S/N'})`).join('<br>');
                 l.innerHTML += `
                 <tr>
                     <td>${j.jugadorName}</td>
@@ -383,4 +401,3 @@
 </script>
 </body>
 </html>
-
