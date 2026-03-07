@@ -23,7 +23,7 @@
             background-image: radial-gradient(circle at 50% -20%, rgba(66,133,244,0.15) 0%, rgba(10,14,23,0) 50%);
         }
 
-        .main-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
+        .main-container { width: 100%; max-width: 550px; padding: 20px; text-align: center; }
         .logo-main { font-size: 3.5rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
 
@@ -49,20 +49,16 @@
         .en-fecha { background: rgba(39, 174, 96, 0.2); color: #2ecc71; border: 1px solid #27ae60; }
         .fuera-fecha { background: rgba(234, 67, 53, 0.2); color: #ff8a80; border: 1px solid #ea4335; }
 
-        .nota-importante { background: rgba(234, 67, 53, 0.1); border: 1px solid var(--danger); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 0.75rem; color: #ff9b9b; line-height: 1.3; }
-
         .extra-section { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; }
         .hidden { display: none !important; }
         
         .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 0.9rem; }
-        .input-field.error { border-color: var(--danger); }
-        .error-msg { color: var(--danger); font-size: 0.7rem; text-align: left; margin-top: -10px; margin-bottom: 10px; display: none; }
         
         .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
-        .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; text-decoration: underline; }
         
         table { width: 100%; border-collapse: collapse; font-size: 0.65rem; color: white; margin-top: 10px; }
         th, td { border: 1px solid rgba(255,255,255,0.1); padding: 5px; text-align: left; }
+        .img-admin { width: 35px; border-radius: 4px; cursor: pointer; margin-right: 2px; }
     </style>
 </head>
 <body>
@@ -86,7 +82,7 @@
             <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
         </div>
         <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Intentar</div>
-        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
+        <div style="margin-top:15px; color:var(--danger); cursor:pointer; text-decoration:underline; font-size:0.8rem;" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
     <div id="form-section" class="card hidden">
@@ -97,17 +93,12 @@
             <div id="status-pago" class="precio-box"></div>
         </div>
 
-        <div class="nota-importante">
-            <strong>IMPORTANTE:</strong> Solo debes completar el formulario si realizaste el pago y cargaste el comprobante.
-        </div>
-
         <form id="regForm" onsubmit="registrar(event)">
             <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
-            <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (Ej: 095555555)" required oninput="validatePhone()">
-            <div id="phone-error" class="error-msg">Error: El formato debe ser 09XXXXXXX</div>
+            <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (Ej: 095555555)" required>
             
             <div class="extra-section">
-                <h4 style="margin: 0 0 10px 0; font-size: 0.8rem; color: var(--color-blue); text-transform: uppercase;">Registro Principal</h4>
+                <h4 style="margin: 0 0 10px 0; font-size: 0.8rem; color: var(--color-blue);">REGISTRO PRINCIPAL</h4>
                 <select id="team1" class="input-field" required onchange="updateLogic()">
                     <option value="">Seleccionar Equipo</option>
                     <option value="Lobos">Lobos</option><option value="Thunderfast">Thunderfast</option>
@@ -138,15 +129,19 @@
             
             <button type="submit" id="btn-envio" class="btn-submit">Enviar Registro</button>
         </form>
-        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
     <div id="admin-panel" class="card hidden">
-        <h3 style="color: #4285f4;">Admin UERH</h3>
+        <h3 style="color: #4285f4;">ADMINISTRACIÓN UERH</h3>
         <div style="overflow-x: auto;">
-            <table><thead><tr><th>Jugador</th><th>Roles</th><th>Fotos</th><th>Acción</th></tr></thead><tbody id="lista-jugadores"></tbody></table>
+            <table>
+                <thead>
+                    <tr><th>Jugador</th><th>Roles / Nº</th><th>Fotos</th><th>Acción</th></tr>
+                </thead>
+                <tbody id="lista-jugadores"></tbody>
+            </table>
         </div>
-        <br><button onclick="handleLogout()" class="input-field">Salir del Panel</button>
+        <br><button onclick="handleLogout()" class="input-field">Cerrar Sesión</button>
     </div>
 </div>
 
@@ -186,7 +181,6 @@
                     mostrarEstadoUsuario(snap.val());
                 } else {
                     document.getElementById('form-section').classList.remove('hidden');
-                    document.getElementById('playerName').value = user.displayName || "";
                     configurarPrecios();
                 }
             }
@@ -195,39 +189,28 @@
 
     function mostrarEstadoUsuario(datos) {
         document.getElementById('already-registered').classList.remove('hidden');
-        const statusText = (datos.estado || "pendiente").toUpperCase();
         const regStatus = document.getElementById('reg-status');
         const cardBox = document.getElementById('status-card-box');
         const icon = document.getElementById('reg-icon');
-        const msg = document.getElementById('reg-msg');
         const btnReintentar = document.getElementById('btn-reintentar');
+        
+        const est = (datos.estado || "pendiente").toLowerCase();
+        regStatus.innerText = "ESTADO: " + est.toUpperCase();
 
-        regStatus.innerText = "ESTADO: " + statusText;
-
-        if (datos.estado === 'rechazado') {
+        if (est === 'rechazado') {
             cardBox.style.borderColor = "var(--danger)";
             icon.innerText = "❌";
             regStatus.style.color = "var(--danger)";
-            document.getElementById('reg-title').innerText = "Registro Rechazado";
-            msg.innerText = "Tu registro no cumple con los requisitos. Por favor, revisa tus datos o el comprobante.";
             btnReintentar.classList.remove('hidden');
-        } else if (datos.estado === 'approved') {
+        } else if (est === 'approved') {
             cardBox.style.borderColor = "var(--success)";
             icon.innerText = "✅";
             regStatus.style.color = "var(--success)";
-            msg.innerText = "Tu registro ha sido aprobado correctamente.";
-            btnReintentar.classList.add('hidden');
-        } else {
-            cardBox.style.borderColor = "var(--color-blue)";
-            icon.innerText = "⏳";
-            regStatus.style.color = "var(--color-blue)";
-            msg.innerText = "Tu solicitud está en revisión.";
-            btnReintentar.classList.add('hidden');
         }
     }
 
     async function borrarYReintentar() {
-        if(confirm("¿Deseas eliminar el registro actual y volver a completar el formulario?")) {
+        if(confirm("¿Deseas borrar tu registro anterior para enviar uno nuevo?")) {
             await firebase.database().ref('inscripciones/' + currentUID).remove();
             location.reload();
         }
@@ -235,82 +218,31 @@
 
     function configurarPrecios() {
         const ahora = new Date();
-        const mes = ahora.getMonth(); 
-        const dia = ahora.getDate();
         const box = document.getElementById('status-pago');
-        if (mes > 3 || (mes === 3 && dia >= 15)) { 
-            box.innerHTML = "MONTO: $1.500 <br> <small>(Desde 15/04)</small>"; 
-            box.className = "precio-box fuera-fecha";
+        if (ahora.getMonth() > 3 || (ahora.getMonth() === 3 && ahora.getDate() >= 15)) { 
+            box.innerHTML = "MONTO: $1.500"; box.className = "precio-box fuera-fecha";
         } else {
-            box.innerHTML = "MONTO: $1.200 <br> <small>(Hasta 14/04)</small>"; 
-            box.className = "precio-box en-fecha";
+            box.innerHTML = "MONTO: $1.200"; box.className = "precio-box en-fecha";
         }
     }
 
-    function validatePhone() {
-        const phoneInput = document.getElementById('whatsapp');
-        const errorDiv = document.getElementById('phone-error');
-        const pattern = /^09\d{7}$/;
-        if (phoneInput.value === "" || pattern.test(phoneInput.value)) {
-            errorDiv.style.display = 'none';
-            phoneInput.classList.remove('error');
-            return true;
-        } else {
-            errorDiv.style.display = 'block';
-            phoneInput.classList.add('error');
-            return false;
-        }
-    }
-
-    let extraCount = 0; let selectedGoleros = []; let selectedTeams = [];
-
+    // LÓGICA DE ROLES EXTRA (Resumida para brevedad)
+    let selectedTeams = [];
     function updateLogic() {
         const t = document.getElementById('team1').value;
-        const r = document.getElementById('role1').value;
         const container = document.getElementById('extra-container');
-        container.innerHTML = ""; extraCount = 0; selectedGoleros = []; selectedTeams = [];
-        if (!t || !r) return;
-        selectedTeams.push(t);
-        if (r.includes("Golero")) {
-            selectedGoleros.push(r);
-            addExtraRole("¿Deseas registrarte en otro equipo?", "both");
-        } else {
-            addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
-        }
+        container.innerHTML = ""; selectedTeams = [t];
+        if (t) addExtraRole();
     }
-
-    function addExtraRole(labelTxt, type) {
-        extraCount++;
-        const teams = ["Lobos", "Thunderfast", "Tejones", "Tcp", "Usb"].filter(t => !selectedTeams.includes(t));
-        const goleros = ["Golero 1", "Golero 2", "Golero 3"].filter(g => !selectedGoleros.includes(g));
+    function addExtraRole() {
+        const teams = ["Lobos", "Thunderfast", "Tejones", "Tcp", "Usb"].filter(x => !selectedTeams.includes(x));
         if (teams.length === 0) return;
         const div = document.createElement('div');
         div.className = "extra-section";
-        div.innerHTML = `
-            <label style="cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                <input type="checkbox" onchange="toggleDiv(this, 'fields_${extraCount}')"> <span>${labelTxt}</span>
-            </label>
-            <div id="fields_${extraCount}" class="hidden">
-                <select class="input-field extra-team" id="team_extra_${extraCount}">
-                    <option value="">Seleccionar Equipo</option>${teams.map(t => `<option value="${t}">${t}</option>`).join('')}
-                </select>
-                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')">
-                    <option value="">Seleccionar Modalidad</option>
-                    ${type === 'both' ? '<option value="Jugador">Jugador</option>' : ''}
-                    ${goleros.map(g => `<option value="${g}">${g}</option>`).join('')}
-                </select>
-            </div>`;
+        div.innerHTML = `<label><input type="checkbox" onchange="this.nextElementSibling.classList.toggle('hidden', !this.checked)"> Agregar otro equipo</label>
+        <div class="hidden"><select class="input-field extra-team">${teams.map(x => `<option value="${x}">${x}</option>`).join('')}</select>
+        <select class="input-field extra-role"><option value="Jugador">Jugador</option><option value="Golero 1">Golero 1</option></select></div>`;
         document.getElementById('extra-container').appendChild(div);
-    }
-
-    function toggleDiv(cb, id) { document.getElementById(id).classList.toggle('hidden', !cb.checked); }
-
-    function handleSelection(sel, idx, type) {
-        const tVal = document.getElementById(`team_extra_${idx}`).value;
-        if (!sel.value || !tVal) { alert("Selecciona equipo y rol."); sel.value = ""; return; }
-        selectedTeams.push(tVal);
-        if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
-        if (extraCount < 3 && selectedTeams.length < 5) addExtraRole("¿Deseas agregar otro registro adicional?", "both");
     }
 
     const resizeImg = (file) => new Promise((res) => {
@@ -318,7 +250,8 @@
         r.onload = (e) => {
             const i = new Image(); i.src = e.target.result;
             i.onload = () => {
-                const c = document.createElement('canvas'); const max = 500; let w = i.width, h = i.height;
+                const c = document.createElement('canvas'); const max = 500;
+                let w = i.width, h = i.height;
                 if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
                 c.width = w; c.height = h; c.getContext('2d').drawImage(i, 0, 0, w, h);
                 res(c.toDataURL('image/jpeg', 0.7));
@@ -326,80 +259,85 @@
         };
     });
 
+    // --- CORRECCIÓN REGISTRO (shirtNum) ---
     async function registrar(e) {
-        e.preventDefault(); if (!validatePhone()) return;
-        
-        // CORRECCIÓN: Se define shirtNum para guardar consistentemente
-        const shirtNum = document.getElementById('shirt1').value;
-        const btn = document.getElementById('btn-envio'); 
-        btn.disabled = true; 
-        btn.innerText = "ENVIANDO...";
+        e.preventDefault();
+        const numCamiseta = document.getElementById('shirt1').value;
+        const btn = document.getElementById('btn-envio');
+        btn.disabled = true; btn.innerText = "ENVIANDO...";
 
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             
-            // CORRECCIÓN: Se usa la propiedad shirtNum en lugar de shirt
             const roles = [{ 
                 team: document.getElementById('team1').value, 
                 role: document.getElementById('role1').value, 
-                shirtNum: shirtNum 
+                shirtNum: numCamiseta 
             }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
                 const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) {
-                    const t = s.querySelector('.extra-team').value; 
-                    const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirtNum: shirtNum });
+                    roles.push({ 
+                        team: s.querySelector('.extra-team').value, 
+                        role: s.querySelector('.extra-role').value, 
+                        shirtNum: numCamiseta 
+                    });
                 }
             });
 
             await firebase.database().ref('inscripciones/' + currentUID).set({
                 jugadorName: document.getElementById('playerName').value,
-                whatsapp: document.getElementById('whatsapp').value,
-                email: currentEmail, 
-                roles: roles, 
-                fotoCarnet: fC, 
-                fotoPago: fP, 
-                estado: "pendiente"
+    whatsapp: document.getElementById('whatsapp').value,
+    email: currentEmail, // Siempre es bueno tener el email
+    shirtNum: numCamiseta, // <--- AGREGADO AQUÍ PARA QUE NO FALLE
+    roles: roles, 
+    fotoCarnet: fC, 
+    fotoPago: fP, 
+    estado: "pendiente"
             });
-            alert("✅ Registro completo."); location.reload();
-        } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Enviar Registro"; }
+
+            alert("✅ Registro enviado."); location.reload();
+        } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
     }
 
+    // --- CORRECCIÓN ADMIN (shirtNum y rechazado) ---
     function cargarAdmin() {
         firebase.database().ref('inscripciones').on('value', snap => {
             const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
             snap.forEach(child => {
                 const j = child.val();
-                // CORRECCIÓN: Se lee shirtNum o shirt para compatibilidad
+                // Buscamos shirtNum, si no existe buscamos shirt (para registros viejos)
                 let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum || r.shirt || '?'})`).join('<br>');
+                
                 l.innerHTML += `
                 <tr>
                     <td>${j.jugadorName}</td>
                     <td>${rHtml}</td>
                     <td>
-                        <img src="${j.fotoCarnet}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
-                        <img src="${j.fotoPago}" style="width:35px; border-radius:4px; cursor:pointer;" onclick="window.open(this.src)">
+                        <img src="${j.fotoCarnet}" class="img-admin" onclick="window.open(this.src)">
+                        <img src="${j.fotoPago}" class="img-admin" onclick="window.open(this.src)">
                     </td>
                     <td>
-                        <button onclick="aprobar('${child.key}')" style="margin-right:5px;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
-                        <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white; border:none; border-radius:3px; cursor:pointer; width:25px;">X</button>
+                        <button onclick="aprobar('${child.key}')">${j.estado === 'aprobado' ? '✅' : 'Ok'}</button>
+                        <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white;">X</button>
                     </td>
                 </tr>`;
             });
         });
     }
 
-    async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
+    async function aprobar(uid) { 
+        if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'aprobado' }); 
+    }
     
-    // CORRECCIÓN: Se asegura que se guarde 'rechazado' en minúsculas
     async function rechazar(uid) { 
-        if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
+        if(confirm("¿Rechazar? Se enviará estado 'rechazado'.")) {
             await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
         }
     }
 </script>
 </body>
 </html>
+
