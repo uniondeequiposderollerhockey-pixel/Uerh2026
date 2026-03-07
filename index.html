@@ -85,7 +85,7 @@
             <span id="reg-msg">Tu solicitud está en revisión.</span><br>
             <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
         </div>
-        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Intentar el Registro</div>
+        <div id="btn-reintentar" class="btn-submit hidden" onclick="borrarYReintentar()" style="background: var(--danger); margin-top: 20px;">Volver a Intentar</div>
         <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
@@ -151,7 +151,6 @@
 </div>
 
 <script>
-    // CONFIGURACIÓN FIREBASE
     firebase.initializeApp({
         apiKey: "AIzaSyCREXn3CyGfcSJlOLYn79vvUbgsTs4tc6c",
         authDomain: "uerh-t2026.firebaseapp.com",
@@ -196,43 +195,39 @@
 
     function mostrarEstadoUsuario(datos) {
         document.getElementById('already-registered').classList.remove('hidden');
+        const statusText = (datos.estado || "pendiente").toUpperCase();
         const regStatus = document.getElementById('reg-status');
         const cardBox = document.getElementById('status-card-box');
         const icon = document.getElementById('reg-icon');
         const msg = document.getElementById('reg-msg');
         const btnReintentar = document.getElementById('btn-reintentar');
-        const title = document.getElementById('reg-title');
 
-        // NORMALIZACIÓN DE ESTADO PARA COMPARACIÓN
-        const estadoActual = datos.estado ? datos.estado.toLowerCase() : "pendiente";
-        regStatus.innerText = "ESTADO: " + estadoActual.toUpperCase();
+        regStatus.innerText = "ESTADO: " + statusText;
 
-        if (estadoActual === 'rechazado') {
+        if (datos.estado === 'rechazado') {
             cardBox.style.borderColor = "var(--danger)";
             icon.innerText = "❌";
             regStatus.style.color = "var(--danger)";
-            title.innerText = "Registro Rechazado";
-            msg.innerText = "Tu registro no ha sido aceptado por inconsistencias. ¿Deseas borrarlo y volver a intentarlo?";
-            btnReintentar.classList.remove('hidden'); // MOSTRAR BOTÓN DE REINTENTO
-        } else if (estadoActual === 'approved') {
+            document.getElementById('reg-title').innerText = "Registro Rechazado";
+            msg.innerText = "Tu registro no cumple con los requisitos. Por favor, revisa tus datos o el comprobante.";
+            btnReintentar.classList.remove('hidden');
+        } else if (datos.estado === 'approved') {
             cardBox.style.borderColor = "var(--success)";
             icon.innerText = "✅";
             regStatus.style.color = "var(--success)";
-            title.innerText = "¡Registro Aprobado!";
-            msg.innerText = "Tu solicitud ha sido validada correctamente.";
+            msg.innerText = "Tu registro ha sido aprobado correctamente.";
             btnReintentar.classList.add('hidden');
         } else {
             cardBox.style.borderColor = "var(--color-blue)";
             icon.innerText = "⏳";
             regStatus.style.color = "var(--color-blue)";
-            title.innerText = "Registro en Proceso";
-            msg.innerText = "Tu solicitud está siendo revisada por la comisión.";
+            msg.innerText = "Tu solicitud está en revisión.";
             btnReintentar.classList.add('hidden');
         }
     }
 
     async function borrarYReintentar() {
-        if(confirm("¿Estás seguro? Se borrarán tus fotos y datos anteriores para que puedas registrarte de nuevo.")) {
+        if(confirm("¿Deseas eliminar el registro actual y volver a completar el formulario?")) {
             await firebase.database().ref('inscripciones/' + currentUID).remove();
             location.reload();
         }
@@ -267,7 +262,6 @@
         }
     }
 
-    // LÓGICA DE ROLES EXTRA
     let extraCount = 0; let selectedGoleros = []; let selectedTeams = [];
 
     function updateLogic() {
@@ -319,7 +313,6 @@
         if (extraCount < 3 && selectedTeams.length < 5) addExtraRole("¿Deseas agregar otro registro adicional?", "both");
     }
 
-    // PROCESAMIENTO DE IMÁGENES
     const resizeImg = (file) => new Promise((res) => {
         const r = new FileReader(); r.readAsDataURL(file);
         r.onload = (e) => {
@@ -333,13 +326,11 @@
         };
     });
 
-    // REGISTRO FINAL
     async function registrar(e) {
-        e.preventDefault(); 
-        if (!validatePhone()) return;
-
-        // CAPTURA DEL NÚMERO DE CAMISETA
-        const nCamiseta = document.getElementById('shirt1').value;
+        e.preventDefault(); if (!validatePhone()) return;
+        
+        // CORRECCIÓN: Se define shirtNum para guardar consistentemente
+        const shirtNum = document.getElementById('shirt1').value;
         const btn = document.getElementById('btn-envio'); 
         btn.disabled = true; 
         btn.innerText = "ENVIANDO...";
@@ -348,11 +339,11 @@
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
             
-            // ASIGNACIÓN DE SHIRTNUM A CADA ROL
+            // CORRECCIÓN: Se usa la propiedad shirtNum en lugar de shirt
             const roles = [{ 
                 team: document.getElementById('team1').value, 
                 role: document.getElementById('role1').value, 
-                shirtNum: nCamiseta 
+                shirtNum: shirtNum 
             }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
@@ -360,9 +351,7 @@
                 if(cb && cb.checked) {
                     const t = s.querySelector('.extra-team').value; 
                     const r = s.querySelector('.extra-role').value;
-                    if(t && r) {
-                        roles.push({ team: t, role: r, shirtNum: nCamiseta });
-                    }
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: shirtNum });
                 }
             });
 
@@ -375,23 +364,17 @@
                 fotoPago: fP, 
                 estado: "pendiente"
             });
-
-            alert("✅ Registro completo. Tu solicitud será revisada."); 
-            location.reload();
-        } catch (err) { 
-            alert("Error: " + err.message); 
-            btn.disabled = false; 
-            btn.innerText = "Enviar Registro"; 
-        }
+            alert("✅ Registro completo."); location.reload();
+        } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Enviar Registro"; }
     }
 
-    // PANEL ADMIN
     function cargarAdmin() {
         firebase.database().ref('inscripciones').on('value', snap => {
             const l = document.getElementById('lista-jugadores'); l.innerHTML = "";
             snap.forEach(child => {
                 const j = child.val();
-                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum || '?'})`).join('<br>');
+                // CORRECCIÓN: Se lee shirtNum o shirt para compatibilidad
+                let rHtml = j.roles.map(r => `${r.team}: ${r.role} (#${r.shirtNum || r.shirt || '?'})`).join('<br>');
                 l.innerHTML += `
                 <tr>
                     <td>${j.jugadorName}</td>
@@ -402,21 +385,19 @@
                     </td>
                     <td>
                         <button onclick="aprobar('${child.key}')" style="margin-right:5px;">${j.estado === 'approved' ? '✅' : 'Ok'}</button>
-                        <button onclick="rechazarAdmin('${child.key}')" style="background:#ea4335; color:white; border:none; border-radius:3px; cursor:pointer; width:25px;">X</button>
+                        <button onclick="rechazar('${child.key}')" style="background:#ea4335; color:white; border:none; border-radius:3px; cursor:pointer; width:25px;">X</button>
                     </td>
                 </tr>`;
             });
         });
     }
 
-    async function aprobar(uid) { if(confirm("¿Aprobar registro?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
+    async function aprobar(uid) { if(confirm("¿Aprobar?")) await firebase.database().ref('inscripciones/' + uid).update({ estado: 'approved' }); }
     
-    // CORRECCIÓN RADICAL: SE USA STRING EXPLÍCITO "rechazado"
-    async function rechazarAdmin(uid) { 
-        if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario recibirá el mensaje para reintentar.")) {
-            await firebase.database().ref('inscripciones/' + uid).update({ 
-                estado: "rechazado" 
-            });
+    // CORRECCIÓN: Se asegura que se guarde 'rechazado' en minúsculas
+    async function rechazar(uid) { 
+        if(confirm("¿Estás seguro de RECHAZAR este registro? El usuario deberá cargar sus datos de nuevo.")) {
+            await firebase.database().ref('inscripciones/' + uid).update({ estado: 'rechazado' });
         }
     }
 </script>
