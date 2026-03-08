@@ -58,6 +58,10 @@
         
         .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
         .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; text-decoration: underline; }
+        
+        /* Estilos para el estado de rechazo */
+        .rechazado-box { border: 1px solid var(--danger); padding: 20px; border-radius: 8px; background: rgba(234, 67, 53, 0.1); }
+        .retry-link { color: #ff8a80; text-decoration: underline; cursor: pointer; font-size: 0.9rem; margin-top: 10px; display: block; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -74,13 +78,16 @@
     </div>
 
     <div id="already-registered" class="card hidden">
-        <div style="padding:20px; border:1px solid var(--success); border-radius:8px;">
-            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-            <strong>¡Ya estás registrado!</strong><br>
-            <span>Tu solicitud está en revisión.</span><br>
-            <span id="reg-status" style="color:var(--color-blue); font-weight:bold; display:block; margin-top:10px;"></span>
+        <div id="status-container" style="padding:20px; border-radius:8px;">
+            <div id="status-icon" style="font-size: 2.5rem; margin-bottom: 10px;"></div>
+            <strong id="status-title"></strong><br>
+            <span id="status-desc"></span><br>
+            <span id="reg-status-label" style="font-weight:bold; display:block; margin-top:10px;"></span>
+            <div id="retry-container" class="hidden">
+                <span class="retry-link" onclick="reintentarRegistro()">Tu registro fue rechazado. Haz clic aquí para intentar de nuevo</span>
+            </div>
         </div>
-        <div class="logout-link" onclick="handleLogout()">Cerrar sesión e ingresar con otro usuario</div>
+        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
     <div id="form-section" class="card hidden">
@@ -181,10 +188,38 @@
             currentUID = user.uid; currentEmail = user.email;
             document.getElementById('auth-section').classList.add('hidden');
             const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
+            
             if (snap.exists()) {
                 const datos = snap.val();
-                document.getElementById('already-registered').classList.remove('hidden');
-                document.getElementById('reg-status').innerText = "ESTADO: " + (datos.estado || "PENDIENTE").toUpperCase();
+                const estado = (datos.estado || "pendiente").toLowerCase();
+                const container = document.getElementById('already-registered');
+                const statusBox = document.getElementById('status-container');
+                const icon = document.getElementById('status-icon');
+                const title = document.getElementById('status-title');
+                const desc = document.getElementById('status-desc');
+                const label = document.getElementById('reg-status-label');
+                const retry = document.getElementById('retry-container');
+
+                container.classList.remove('hidden');
+                label.innerText = "ESTADO: " + estado.toUpperCase();
+
+                if (estado === 'rechazado') {
+                    statusBox.className = "rechazado-box";
+                    icon.innerText = "✖";
+                    icon.style.color = "var(--danger)";
+                    title.innerText = "RECHAZADO";
+                    title.style.color = "var(--danger)";
+                    desc.innerText = "Tu registro no fue aprobado.";
+                    retry.classList.remove('hidden');
+                } else {
+                    statusBox.style.border = "1px solid var(--success)";
+                    icon.innerText = "✅";
+                    icon.style.color = "var(--success)";
+                    title.innerText = "¡Ya estás registrado!";
+                    desc.innerText = "Tu solicitud está en revisión.";
+                    label.style.color = "var(--color-blue)";
+                    retry.classList.add('hidden');
+                }
             } else {
                 document.getElementById('form-section').classList.remove('hidden');
                 document.getElementById('playerName').value = user.displayName || "";
@@ -197,26 +232,39 @@
         }
     });
 
+    async function reintentarRegistro() {
+        if (confirm("¿Deseas eliminar el registro rechazado e intentar de nuevo?")) {
+            await firebase.database().ref('inscripciones/' + currentUID).remove();
+            location.reload();
+        }
+    }
+
     function updateLogic() {
         const t = document.getElementById('team1').value;
         const r = document.getElementById('role1').value;
         const container = document.getElementById('extra-container');
         container.innerHTML = ""; extraCount = 0; selectedGoleros = []; selectedTeams = [];
         if (!t || !r) return;
+        
         selectedTeams.push(t);
-        if (r.includes("Golero")) {
-            selectedGoleros.push(r);
-            addExtraRole("¿Deseas registrarte en otro equipo?", "both");
-        } else {
-            addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
-        }
+        let hasPlayerRole = (r === "Jugador" || r.includes("(A)") || r.includes("(C)"));
+        if (r.includes("Golero")) selectedGoleros.push(r);
+
+        const nextType = hasPlayerRole ? "onlyGolero" : "both";
+        addExtraRole(hasPlayerRole ? "¿Quieres ser Golero en otro equipo?" : "¿Deseas otro registro (Jugador o Golero)?", nextType);
     }
 
     function addExtraRole(labelTxt, type) {
         extraCount++;
         const teams = ["Lobos", "Thunderfast", "Tejones", "Tcp", "Usb"].filter(t => !selectedTeams.includes(t));
         const goleros = ["Golero 1", "Golero 2", "Golero 3"].filter(g => !selectedGoleros.includes(g));
+        
         if (teams.length === 0) return;
+        
+        let options = '<option value="">Seleccionar Modalidad</option>';
+        if (type === "both") options += '<option value="Jugador">Jugador</option>';
+        goleros.forEach(g => { options += `<option value="${g}">${g}</option>`; });
+
         const div = document.createElement('div');
         div.className = "extra-section";
         div.innerHTML = `
@@ -227,10 +275,8 @@
                 <select class="input-field extra-team" id="team_extra_${extraCount}">
                     <option value="">Seleccionar Equipo</option>${teams.map(t => `<option value="${t}">${t}</option>`).join('')}
                 </select>
-                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}', '${type}')">
-                    <option value="">Seleccionar Modalidad</option>
-                    ${type === 'both' ? '<option value="Jugador">Jugador</option>' : ''}
-                    ${goleros.map(g => `<option value="${g}">${g}</option>`).join('')}
+                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}')">
+                    ${options}
                 </select>
             </div>`;
         document.getElementById('extra-container').appendChild(div);
@@ -238,12 +284,26 @@
 
     function toggleDiv(cb, id) { document.getElementById(id).classList.toggle('hidden', !cb.checked); }
 
-    function handleSelection(sel, idx, type) {
+    function handleSelection(sel, idx) {
         const tVal = document.getElementById(`team_extra_${idx}`).value;
         if (!sel.value || !tVal) { alert("Selecciona equipo y rol."); sel.value = ""; return; }
+        
         selectedTeams.push(tVal);
         if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
-        if (extraCount < 3 && selectedTeams.length < 5) addExtraRole("¿Deseas agregar otro registro adicional?", "both");
+
+        const allRoles = [document.getElementById('role1').value];
+        document.querySelectorAll('.extra-role').forEach(s => { if(s.value) allRoles.push(s.value); });
+        const alreadyHasPlayer = allRoles.some(r => r === "Jugador" || r.includes("(A)") || r.includes("(C)"));
+
+        if (selectedTeams.length < 5) {
+            if (alreadyHasPlayer) {
+                if (selectedGoleros.length < 3) {
+                    addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
+                }
+            } else {
+                addExtraRole("¿Deseas agregar otro registro (Jugador o Golero)?", "both");
+            }
+        }
     }
 
     function validatePhone() {
