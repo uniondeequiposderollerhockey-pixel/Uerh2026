@@ -3,34 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>U.E.R.H. - Registro Oficial 2026</title>
+    <title>Inscripciones U.E.R.H 2025</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root {
-            --bg-dark: #0a0e17; --bg-card: #111622; --text-main: #ffffff;
-            --text-muted: #8b9bb4; --success: #27ae60; --danger: #ea4335;
-            --color-blue: #4285f4; --color-red: #ea4335;
+        :root { --primary: #1a73e8; --success: #27ae60; --error: #d93025; }
+        body { font-family: -apple-system, sans-serif; margin: 0; padding: 15px; background: #f0f2f5; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 20px; }
+        .logo { max-width: 120px; border-radius: 10px; }
+        h2 { text-align: center; color: var(--primary); margin-top: 0; }
+        .hidden { display: none; }
+        .field-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85rem; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-primary { background: var(--primary); color: white; margin-top: 10px; }
+        .btn-secondary { background: none; color: var(--primary); text-decoration: underline; font-size: 0.8rem; margin-top: 10px; }
+        .price-tag { text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--success); background: #eafaf1; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+        .img-preview { width: 100%; max-height: 120px; object-fit: contain; margin-top: 5px; display: none; border: 1px solid #ddd; border-radius: 5px; }
+        .copy-area { margin-top: 15px; padding: 10px; background: #f9f9f9; border: 1px dashed var(--primary); border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="logo.png" alt="Logo U.E.R.H" class="logo" onerror="this.style.display='none'">
+</div>
+
+<div id="auth-section" class="container">
+    <h2 id="auth-title">Acceso Atletas</h2>
+    <div class="field-group">
+        <label>Email:</label>
+        <input type="email" id="email" placeholder="ejemplo@mail.com">
+    </div>
+    <div id="pass-group" class="field-group">
+        <label>Contraseña:</label>
+        <input type="password" id="pass" placeholder="Min. 6 caracteres">
+    </div>
+    <div id="sec-group" class="field-group hidden">
+        <label>Seguridad: ¿Nombre de tu mascota?</label>
+        <input type="text" id="ans" placeholder="Para recuperar tu cuenta">
+    </div>
+    <button class="btn-primary" id="main-btn" onclick="handleAuth()">Ingresar</button>
+    <div style="text-align: center;">
+        <button class="btn-secondary" id="toggle-btn" onclick="setMode('register')">¿No tienes cuenta? Regístrate</button><br>
+        <button class="btn-secondary" id="forgot-btn" onclick="setMode('recover')">Olvidé mi contraseña</button>
+    </div>
+</div>
+
+<div id="form-section" class="container hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <small id="user-display" style="color:var(--primary); font-weight:bold;"></small>
+        <button onclick="logout()" style="width:auto; background:var(--error); color:white; padding:4px 8px; font-size:10px;">Salir</button>
+    </div>
+    <div class="price-tag" id="price-txt"></div>
+    
+    <div class="field-group"><label>Atleta:</label><input type="text" id="fname" oninput="update()"></div>
+    <div class="field-group"><label>Teléfono:</label><input type="tel" id="ftel" oninput="update()"></div>
+    <div class="field-group">
+        <label>Equipo:</label>
+        <select id="fequipo" onchange="update()">
+            <option>Thunderfast</option><option>Tejones</option><option>Lobos</option><option>Tcp</option><option>Usb</option>
+        </select>
+    </div>
+    <div class="field-group"><label>Camiseta:</label><input type="number" id="fnum" oninput="update()"></div>
+    <div class="field-group"><label>Foto Carnet:</label><input type="file" accept="image/*" onchange="preview(this,'p1')"><img id="p1" class="img-preview"></div>
+    <div class="field-group"><label>Pago:</label><input type="file" accept="image/*" onchange="preview(this,'p2')"><img id="p2" class="img-preview"></div>
+    
+    <button class="btn-primary" id="save-btn" onclick="save()">ENVIAR INSCRIPCIÓN</button>
+
+    <div class="copy-area" onclick="copy()">
+        <div id="out"></div>
+        <p style="text-align:center; font-size:9px; margin:5px 0 0 0; color:#666;">Toca para copiar resumen</p>
+    </div>
+</div>
+
+<script>
+    // CONFIGURACIÓN ACTUALIZADA CON TUS DATOS
+    const firebaseConfig = {
+        apiKey: "AIzaSyCREXn3CyGfcSJlOLYn79vvUbgsTs4tc6c",
+        authDomain: "uerh-t2026.firebaseapp.com",
+        databaseURL: "https://uerh-t2026-default-rtdb.firebaseio.com",
+        projectId: "uerh-t2026",
+        storageBucket: "uerh-t2026.firebasestorage.app",
+        messagingSenderId: "378184888320",
+        appId: "1:378184888320:web:72183df90850048fc028e5",
+        measurementId: "G-QD7SEHGT5V"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    let mode = 'login';
+    const costo = (new Date() < new Date(2026, 3, 1)) ? 1200 : 1500;
+
+    function setMode(m) {
+        mode = m;
+        document.getElementById('sec-group').classList.toggle('hidden', m !== 'register' && m !== 'recover');
+        document.getElementById('pass-group').classList.toggle('hidden', m === 'recover');
+        document.getElementById('auth-title').innerText = m === 'login' ? 'Iniciar Sesión' : (m === 'register' ? 'Registro' : 'Recuperar');
+        document.getElementById('main-btn').innerText = m === 'login' ? 'Ingresar' : (m === 'register' ? 'Registrarme' : 'Verificar');
+        document.getElementById('toggle-btn').innerText = m === 'login' ? '¿No tienes cuenta? Regístrate' : 'Volver';
+        document.getElementById('forgot-btn').classList.toggle('hidden', m !== 'login');
+    }
+
+    async function handleAuth() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        const ans = document.getElementById('ans').value;
+        if(!email.includes('@')) return alert("Email inválido");
+        try {
+            if(mode === 'register') {
+                const res = await auth.createUserWithEmailAndPassword(email, pass);
+                await db.ref('users/'+res.user.uid).set({email, ans});
+            } else if(mode === 'recover') {
+                const snap = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+                if(snap.exists()) {
+                    const u = Object.values(snap.val())[0];
+                    if(u.ans === ans) alert("Tu verificación es correcta. Intenta recordar tu clave o contacta al admin.");
+                    else alert("Respuesta incorrecta");
+                }
+            } else { await auth.signInWithEmailAndPassword(email, pass); }
+        } catch(e) { alert(e.message); }
+    }
+
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('form-section').classList.remove('hidden');
+            document.getElementById('user-display').innerText = user.email;
+            document.getElementById('price-txt').innerText = "Monto: $" + costo;
+            update();
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('form-section').classList.add('hidden');
         }
+    });
 
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; 
-            background-color: var(--bg-dark); color: var(--text-main);
-            display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            background-image: radial-gradient(circle at 50% -20%, rgba(66,133,244,0.15) 0%, rgba(10,14,23,0) 50%);
+    function preview(input, id) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => { 
+                const img = document.getElementById(id);
+                img.src = e.target.result; img.style.display = 'block'; update();
+            };
+            reader.readAsDataURL(input.files[0]);
         }
+    }
 
-        .main-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
-        .logo-main { font-size: 3.5rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
+    function update() {
+        const out = document.getElementById('out');
+        const p1 = document.getElementById('p1').style.display === 'block' ? "OK" : "NO";
+        const p2 = document.getElementById('p2').style.display === 'block' ? "OK" : "NO";
+        out.innerHTML = `
+            <b>U.E.R.H 2025 - FICHA</b><br>
+            Atleta: ${document.getElementById('fname').value || "---"}<br>
+            Tel: ${document.getElementById('ftel').value || "---"}<br>
+            Equipo: ${document.getElementById('fequipo').value}<br>
+            Camiseta: ${document.getElementById('fnum').value}<br>
+            Archivos: Carnet(${p1}) Pago(${p2})<br>
+            Total: $${costo}
+        `;
+    }
 
-        .card { background-color: var(--bg-card); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+    async function save() {
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true; btn.innerText = "Enviando...";
+        const data = {
+            atleta: document.getElementById('fname').value,
+            tel: document.getElementById('ftel').value,
+            equipo: document.getElementById('fequipo').value,
+            camiseta: document.getElementById('fnum').value,
+            fotoCarnet: document.getElementById('p1').src,
+            fotoPago: document.getElementById('p2').src,
+            email: auth.currentUser.email,
+            fecha: new Date().toLocaleString()
+        };
+        db.ref('inscripciones/' + auth.currentUser.uid).set(data)
+            .then(() => { alert("¡Guardado en base de datos!"); btn.disabled = false; btn.innerText = "ENVIAR INSCRIPCIÓN"; })
+            .catch(e => { alert(e.message); btn.disabled = false; });
+    }
 
-        .btn-google {
-            background: transparent; color: white; border: none; display: flex;
-            align-items: center; justify-content: center; gap: 12px; width: 100%;
-            padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer;
-            position: relative; z-index: 1; margin-bottom: 10px;
+    function copy() {
+        navigator.clipboard.writeText(document.getElementById('out').innerText);
+        alert("Copiado");
+    }
+
+    function logout() { auth.signOut(); }
+</script>
+</body>
+</html>
