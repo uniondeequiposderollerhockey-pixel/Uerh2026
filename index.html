@@ -59,7 +59,6 @@
         .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
         .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; text-decoration: underline; }
         
-        /* Estilos para el estado de rechazo */
         .rechazado-box { border: 1px solid var(--danger); padding: 20px; border-radius: 8px; background: rgba(234, 67, 53, 0.1); }
         .retry-link { color: #ff8a80; text-decoration: underline; cursor: pointer; font-size: 0.9rem; margin-top: 10px; display: block; font-weight: bold; }
     </style>
@@ -162,6 +161,9 @@
     let selectedGoleros = []; 
     let selectedTeams = [];
 
+    // Lista de administradores autorizados para registros múltiples
+    const ADMIN_EMAILS = ['rojjosue@gmail.com', 'uniondeequiposderollerhockey@gmail.com'];
+
     function avisarNuevoRegistro(datos) {
         const urlMake = "https://hook.us2.make.com/tnzwhobq9ir8syhbi3ckv0jyskenmefx";
         fetch(urlMake, {
@@ -178,18 +180,23 @@
 
     async function login() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        await firebase.auth().signInWithPopup(provider);
+        // Usamos Redirect en lugar de Popup para mayor estabilidad
+        await firebase.auth().signInWithRedirect(provider);
     }
 
     function handleLogout() { firebase.auth().signOut().then(() => location.reload()); }
 
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
-            currentUID = user.uid; currentEmail = user.email;
+            currentUID = user.uid; 
+            currentEmail = user.email.toLowerCase();
             document.getElementById('auth-section').classList.add('hidden');
+            
+            const isAdmin = ADMIN_EMAILS.includes(currentEmail);
             const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
             
-            if (snap.exists()) {
+            // Si el usuario ya existe Y NO es administrador, mostramos pantalla de estado
+            if (snap.exists() && !isAdmin) {
                 const datos = snap.val();
                 const estado = (datos.estado || "pendiente").toLowerCase();
                 const container = document.getElementById('already-registered');
@@ -221,8 +228,12 @@
                     retry.classList.add('hidden');
                 }
             } else {
+                // Si es nuevo O es ADMIN, mostramos el formulario
                 document.getElementById('form-section').classList.remove('hidden');
-                document.getElementById('playerName').value = user.displayName || "";
+                document.getElementById('already-registered').classList.add('hidden');
+                
+                // Si es admin, dejamos el nombre vacío para llenar el del jugador
+                document.getElementById('playerName').value = isAdmin ? "" : (user.displayName || "");
                 configurarPrecios();
             }
         } else {
@@ -239,6 +250,7 @@
         }
     }
 
+    // --- Lógica de roles y equipos (se mantiene según tu original) ---
     function updateLogic() {
         const t = document.getElementById('team1').value;
         const r = document.getElementById('role1').value;
@@ -340,34 +352,4 @@
 
     async function registrar(e) {
         e.preventDefault(); if (!validatePhone()) return;
-        const btn = document.getElementById('btn-envio'); btn.disabled = true; btn.innerText = "ENVIANDO...";
-        try {
-            const fC = await resizeImg(document.getElementById('f1').files[0]);
-            const fP = await resizeImg(document.getElementById('f2').files[0]);
-            const nroCamiseta = document.getElementById('shirt1').value;
-            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: nroCamiseta }];
-
-            document.querySelectorAll('.extra-section').forEach(s => {
-                const cb = s.querySelector('input[type="checkbox"]');
-                if(cb && cb.checked) {
-                    const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirtNum: nroCamiseta });
-                }
-            });
-
-            const misDatos = {
-                jugadorName: document.getElementById('playerName').value,
-                whatsapp: document.getElementById('whatsapp').value,
-                email: currentEmail,
-                shirtNum: nroCamiseta,
-                roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente"
-            };
-
-            await firebase.database().ref('inscripciones/' + currentUID).set(misDatos);
-            avisarNuevoRegistro(misDatos);
-            alert("✅ Registro completo."); location.reload();
-        } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
-    }
-</script>
-</body>
-</html>
+        const btn = document.getElementById('btn-envio'); btn.disabled = true; btn.innerText = "ENVI
