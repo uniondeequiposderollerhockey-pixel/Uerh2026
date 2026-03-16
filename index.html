@@ -159,12 +159,12 @@
     let currentEmail = null;
     const ADMIN_EMAILS = ['rojjosue@gmail.com', 'uniondeequiposderollerhockey@gmail.com'];
 
-    // Capturar resultado de redirección inmediatamente al cargar
+    // Capturar cualquier resultado pendiente al cargar la página
     window.onload = async () => {
         try {
             await firebase.auth().getRedirectResult();
         } catch (error) {
-            console.error("Error redirect:", error);
+            console.error("Error al cargar sesión:", error);
         }
     };
 
@@ -172,10 +172,11 @@
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         try {
-            // Persistencia LOCAL para que no se cierre la sesión sola
             await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            await firebase.auth().signInWithRedirect(provider);
+            // Usamos Popup para evitar el rebote del video
+            await firebase.auth().signInWithPopup(provider);
         } catch (error) {
+            console.error("Error en login:", error);
             alert("Error: " + error.message);
         }
     }
@@ -189,16 +190,14 @@
             document.getElementById('auth-section').classList.add('hidden');
             
             const isAdmin = ADMIN_EMAILS.includes(currentEmail);
-            // Consultar base de datos para ver si ya existe registro
+            // Usamos once para asegurar que la lectura sea inmediata
             const snap = await firebase.database().ref('inscripciones/' + user.uid).once('value');
             
-            // Si es ADMIN puede entrar siempre, si no, se bloquea si ya existe registro
             if (snap.exists() && !isAdmin) {
                 mostrarEstadoRegistro(snap.val());
             } else {
                 document.getElementById('form-section').classList.remove('hidden');
                 document.getElementById('already-registered').classList.add('hidden');
-                // Si es admin, limpia el nombre para permitir registrar a otros
                 document.getElementById('playerName').value = isAdmin ? "" : (user.displayName || "");
                 configurarPrecios();
             }
@@ -360,14 +359,13 @@
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
-            const nro = document.getElementById('shirt1').value;
-            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: nro }];
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: document.getElementById('shirt1').value }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
                 const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) {
                     const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirtNum: nro });
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: document.getElementById('shirt1').value });
                 }
             });
 
@@ -375,12 +373,11 @@
                 jugadorName: document.getElementById('playerName').value,
                 whatsapp: document.getElementById('whatsapp').value,
                 email: currentEmail,
-                shirtNum: nro,
+                shirtNum: document.getElementById('shirt1').value,
                 roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente",
                 fechaRegistro: new Date().toISOString()
             };
 
-            // Los administradores guardan con ID único para permitir registros múltiples
             let path = 'inscripciones/' + currentUID;
             if (ADMIN_EMAILS.includes(currentEmail)) {
                 path = 'inscripciones/' + currentUID + "_" + Date.now();
