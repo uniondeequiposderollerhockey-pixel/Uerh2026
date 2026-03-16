@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UERH Admin - Panel Oficial</title>
+    <title>U.E.R.H. - Registro Oficial 2026</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
@@ -19,25 +19,21 @@
         body {
             font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; 
             background-color: var(--bg-dark); color: var(--text-main);
-            min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
             background-image: radial-gradient(circle at 50% -20%, rgba(66,133,244,0.15) 0%, rgba(10,14,23,0) 50%);
         }
 
-        #login-screen {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; text-align: center; padding: 20px;
-        }
-        .logo-main { 
-            font-size: 4rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; 
-            background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-        }
-        .logo-subtext { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 30px; letter-spacing: 2px; }
+        .main-container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
+        .logo-main { font-size: 3.5rem; font-weight: 800; letter-spacing: 0.2em; margin: 0; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-subtext { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 25px; }
+
+        .card { background-color: var(--bg-card); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 
         .btn-google {
             background: transparent; color: white; border: none; display: flex;
-            align-items: center; justify-content: center; gap: 12px; width: 280px;
+            align-items: center; justify-content: center; gap: 12px; width: 100%;
             padding: 14px; border-radius: 8px; font-weight: 600; cursor: pointer;
-            position: relative; z-index: 1; transition: transform 0.2s;
+            position: relative; z-index: 1; margin-bottom: 10px;
         }
         .btn-google::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -47,169 +43,105 @@
             -webkit-mask-composite: destination-out; mask-composite: exclude;
         }
 
-        .container { max-width: 1100px; margin: auto; padding: 20px; display: none; }
-        .user-bar { background: var(--bg-card); padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+        .bank-info { background: rgba(66, 133, 244, 0.1); border: 1px dashed var(--color-blue); padding: 15px; border-radius: 8px; margin-bottom: 10px; text-align: left; font-size: 0.85rem; }
+        .precio-box { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; font-size: 1.1rem; }
+        .en-fecha { background: rgba(39, 174, 96, 0.2); color: #2ecc71; border: 1px solid #27ae60; }
+        .fuera-fecha { background: rgba(234, 67, 53, 0.2); color: #ff8a80; border: 1px solid #ea4335; }
+
+        .nota-importante { background: rgba(234, 67, 53, 0.1); border: 1px solid var(--danger); padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 0.75rem; color: #ff9b9b; line-height: 1.3; }
+
+        .extra-section { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; }
+        .hidden { display: none !important; }
         
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .nav-link { color: var(--text-muted); cursor: pointer; padding: 8px 15px; border-radius: 6px; font-size: 0.9rem; transition: 0.3s; }
-        .nav-link.active { background: var(--color-blue); color: white; }
-
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .stats { display: flex; gap: 12px; }
-        .stat-box { background: var(--bg-card); padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center; min-width: 110px; }
-        .stat-box small { display: block; font-size: 0.65rem; color: var(--color-blue); text-transform: uppercase; }
-        .stat-box span { font-size: 1.2rem; font-weight: bold; }
-
-        .controls-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
-        .search-input, .select-input { 
-            background: #1c2333; border: 1px solid #333; color: white; 
-            padding: 10px; border-radius: 6px; font-size: 0.85rem; outline: none;
-        }
-        .btn-export { 
-            background: #27ae60; color: white; border: none; padding: 10px 15px; 
-            border-radius: 6px; cursor: pointer; font-weight: bold; margin-left: auto;
-        }
-
-        .table-wrapper { background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;}
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { background: #161b28; color: var(--color-blue); text-align: left; padding: 15px; text-transform: uppercase; font-size: 0.7rem; }
-        td { padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-
-        .foto-mini { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #333; margin-right: 5px; }
+        .input-field { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: white; margin-bottom: 12px; box-sizing: border-box; font-size: 0.9rem; }
+        .error-msg { color: var(--danger); font-size: 0.7rem; text-align: left; margin-top: -10px; margin-bottom: 10px; display: none; }
         
-        .badge { padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; }
-        .badge-approved { background: rgba(39, 174, 96, 0.1); color: #27ae60; }
-        .badge-pending { background: rgba(241, 196, 15, 0.1); color: #f1c40f; }
-        .badge-rechazado { background: rgba(234, 67, 53, 0.1); color: var(--danger); }
-
-        .btn-action { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; color: white; margin-right: 3px; }
-        .btn-ok { background: var(--color-blue); }
-        .btn-no { background: var(--danger); }
-        .btn-edit { background: #555; }
-        .btn-del { background: #333; }
-
-        .modal-overlay { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); justify-content: center; align-items: center; }
-        #modal-img { max-width: 90%; max-height: 80vh; border-radius: 10px; }
-
-        .modal-content { 
-            background: var(--bg-card); padding: 30px; border-radius: 15px; 
-            width: 400px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .modal-content label { display: block; margin: 15px 0 5px; font-size: 0.8rem; color: var(--text-muted); }
-        .modal-content input, .modal-content select { width: 100%; background: #0a0e17; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; box-sizing: border-box; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
-
-        .section-panel { display: none; }
-        .section-panel.active { display: block; }
+        .btn-submit { width: 100%; padding: 15px; background: linear-gradient(90deg, #1d4ed8, #1e40af); color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
+        .logout-link { display: inline-block; margin-top: 15px; color: var(--danger); font-size: 0.75rem; cursor: pointer; opacity: 0.8; text-decoration: underline; }
+        
+        /* Estilos para el estado de rechazo */
+        .rechazado-box { border: 1px solid var(--danger); padding: 20px; border-radius: 8px; background: rgba(234, 67, 53, 0.1); }
+        .retry-link { color: #ff8a80; text-decoration: underline; cursor: pointer; font-size: 0.9rem; margin-top: 10px; display: block; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
+<div class="main-container">
     <h1 class="logo-main">UERH</h1>
-    <div class="logo-subtext">ADMINISTRATION PANEL 2026</div>
-    <button class="btn-google" onclick="login()">
-        <img src="https://www.google.com/favicon.ico" width="18">
-        CONTINUAR CON GOOGLE
-    </button>
-</div>
+    <div class="logo-subtext">Unión de Equipos de Roller Hockey</div>
 
-<div id="main-container" class="container">
-    <div class="user-bar">
-        <div><span id="user-mail"></span> <span id="user-role" style="margin-left:10px; font-weight:bold;"></span></div>
-        <button onclick="logout()" style="background:none; border:1px solid #333; color:#888; cursor:pointer; padding:5px 12px; border-radius:6px;">Salir</button>
+    <div id="auth-section" class="card">
+        <h2 style="font-size: 1.1rem; margin-bottom: 20px;">Portal de Registro 2026</h2>
+        <button class="btn-google" onclick="login()">
+            <img src="https://www.google.com/favicon.ico" width="16"> Continuar con Google
+        </button>
     </div>
 
-    <div id="admin-nav" class="nav-tabs" style="display:none;">
-        <div class="nav-link active" onclick="switchTab('tab-inscripciones', this)">Inscripciones</div>
-        <div class="nav-link" onclick="switchTab('tab-usuarios', this)">Gestión de Usuarios</div>
-    </div>
-
-    <div id="tab-inscripciones" class="section-panel active">
-        <div class="header">
-            <h2>UERH<span style="color:var(--color-blue)">ADMIN</span></h2>
-            <div class="stats">
-                <div class="stat-box"><small>Inscritos</small><span id="count-j">0</span></div>
-                <div class="stat-box"><small>Caja Total</small><span id="count-m" style="color:var(--success)">$ 0</span></div>
+    <div id="already-registered" class="card hidden">
+        <div id="status-container" style="padding:20px; border-radius:8px;">
+            <div id="status-icon" style="font-size: 2.5rem; margin-bottom: 10px;"></div>
+            <strong id="status-title"></strong><br>
+            <span id="status-desc"></span><br>
+            <span id="reg-status-label" style="font-weight:bold; display:block; margin-top:10px;"></span>
+            <div id="retry-container" class="hidden">
+                <span class="retry-link" onclick="reintentarRegistro()">Tu registro fue rechazado. Haz clic aquí para intentar de nuevo</span>
             </div>
         </div>
-
-        <div class="controls-row">
-            <input type="text" id="search-player" class="search-input" placeholder="Buscar por jugador..." oninput="filtrarYMostrar()">
-            <select id="filter-team" class="select-input" onchange="filtrarYMostrar()">
-                <option value="">Todos los Equipos</option>
-            </select>
-            <button class="btn-export" onclick="exportarCSV()">📊 Exportar CSV</button>
-        </div>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fotos</th>
-                        <th>Jugador / #</th>
-                        <th>Equipo / Rol</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="main-table"></tbody>
-            </table>
-        </div>
+        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 
-    <div id="tab-usuarios" class="section-panel">
-        <div class="header">
-            <h2>GESTIÓN DE <span style="color:var(--color-blue)">PERMISOS</span></h2>
-        </div>
-        
-        <div class="controls-row" style="background: var(--bg-card); padding: 15px; border-radius: 10px; border: 1px solid #333;">
-            <input type="email" id="new-user-email" class="search-input" placeholder="Correo Gmail..." style="width: 250px;">
-            <select id="new-user-role" class="select-input">
-                <option value="admin">ADMIN (Editar)</option>
-                <option value="viewer">VISOR (Solo ver)</option>
-            </select>
-            <button class="btn-export" onclick="agregarUsuario()" style="margin-left: 0;">+ Agregar</button>
+    <div id="form-section" class="card hidden">
+        <div class="bank-info">
+            <strong style="color: var(--color-blue)">DATOS PARA EL PAGO:</strong><br>
+            Banco: <strong>Itaú</strong> | Caja de Ahorro: <strong>8806679</strong><br>
+            Nombre: <strong>Josué Rojas</strong>
+            <div id="status-pago" class="precio-box"></div>
         </div>
 
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Rango</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="users-table"></tbody>
-            </table>
+        <div class="nota-importante">
+            <strong>IMPORTANTE:</strong> Solo debes completar el formulario si realizaste el pago y cargaste el comprobante.
+            <br><br>
+            <span style="color: #ffffff;">Recuerda que el costo de $1.200 es válido únicamente para depósitos realizados hasta el 14/04 inclusive.</span>
         </div>
-    </div>
-</div>
 
-<div id="modal-visor" class="modal-overlay" onclick="this.style.display='none'">
-    <img id="modal-img" src="">
-</div>
+        <form id="regForm" onsubmit="registrar(event)">
+            <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
+            <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (Ej: 095555555)" required oninput="validatePhone()">
+            <div id="phone-error" class="error-msg">Error: El formato debe ser 09XXXXXXX</div>
+            
+            <div class="extra-section">
+                <h4 style="margin: 0 0 10px 0; font-size: 0.8rem; color: var(--color-blue); text-transform: uppercase;">Registro Principal</h4>
+                <select id="team1" class="input-field" required onchange="updateLogic()">
+                    <option value="">Seleccionar Equipo</option>
+                    <option value="Lobos">Lobos</option><option value="Thunderfast">Thunderfast</option>
+                    <option value="Tejones">Tejones</option><option value="Tcp">Tcp</option><option value="Usb">Usb</option>
+                </select>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="shirt1" class="input-field" placeholder="Nº" style="flex:1" required>
+                    <select id="role1" class="input-field" style="flex:2" required onchange="updateLogic()">
+                        <option value="">Seleccionar Rol</option>
+                        <option value="Jugador">Jugador</option>
+                        <option value="Asistente (A)">Asistente (A)</option>
+                        <option value="Capitán (C)">Capitán (C)</option>
+                        <option value="Golero 1">Golero 1</option>
+                        <option value="Golero 2">Golero 2</option>
+                        <option value="Golero 3">Golero 3</option>
+                    </select>
+                </div>
+            </div>
 
-<div id="modal-edit" class="modal-overlay">
-    <div class="modal-content">
-        <h3 style="margin-top:0; color:var(--color-blue)">Editar Registro</h3>
-        <input type="hidden" id="edit-id">
-        <label>Nombre</label><input type="text" id="edit-name">
-        <label>WhatsApp</label><input type="text" id="edit-whatsapp">
-        <label># Camiseta</label><input type="text" id="edit-shirt">
-        <label>Equipo</label><input type="text" id="edit-team">
-        <label>Rol</label><input type="text" id="edit-role">
-        <label>Estado</label>
-        <select id="edit-status">
-            <option value="pending">PENDIENTE</option>
-            <option value="approved">APROBADO</option>
-            <option value="rechazado">RECHAZADO</option>
-        </select>
-        <div class="modal-actions">
-            <button onclick="cerrarModalEdicion()" style="background:transparent; color:#888; border:1px solid #333; padding:10px 20px; border-radius:6px; cursor:pointer;">Cancelar</button>
-            <button onclick="guardarEdicion()" style="background:var(--color-blue); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Guardar</button>
-        </div>
+            <div id="extra-container"></div>
+
+            <div style="text-align:left; margin-top:15px;">
+                <label style="font-size:0.7rem; color:var(--text-muted)">FOTO CARNET:</label>
+                <input type="file" id="f1" accept="image/*" class="input-field" required>
+                <label style="font-size:0.7rem; color:var(--text-muted)">COMPROBANTE PAGO:</label>
+                <input type="file" id="f2" accept="image/*" class="input-field" required>
+            </div>
+            
+            <button type="submit" id="btn-envio" class="btn-submit">Enviar Registro</button>
+        </form>
+        <div class="logout-link" onclick="handleLogout()">Cerrar sesión</div>
     </div>
 </div>
 
@@ -224,193 +156,217 @@
         appId: "1:378184888320:web:72183df90850048fc028e5"
     });
 
-    const db = firebase.database();
-    const auth = firebase.auth();
-    let rawData = {};
-    let usersData = {};
-    let isEditor = false;
+    let currentUID = null;
+    let currentEmail = null;
+    let extraCount = 0; 
+    let selectedGoleros = []; 
+    let selectedTeams = [];
 
-    function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-    function logout() { auth.signOut().then(() => location.reload()); }
+    function avisarNuevoRegistro(datos) {
+        const urlMake = "https://hook.us2.make.com/tnzwhobq9ir8syhbi3ckv0jyskenmefx";
+        fetch(urlMake, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                jugador: datos.jugadorName,
+                equipo: datos.roles[0].team,
+                whatsapp: datos.whatsapp,
+                nro: datos.shirtNum
+            })
+        }).catch(err => console.error("Error Make:", err));
+    }
 
-    // --- LÓGICA DE ACCESO LIBRE Y ROLES ---
-    auth.onAuthStateChanged(user => {
+    async function login() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await firebase.auth().signInWithPopup(provider);
+    }
+
+    function handleLogout() { firebase.auth().signOut().then(() => location.reload()); }
+
+    firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
-            const email = user.email.toLowerCase();
+            currentUID = user.uid; currentEmail = user.email;
+            document.getElementById('auth-section').classList.add('hidden');
+            const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
             
-            // Acceso permitido para todos los que inicien sesión
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-container').style.display = 'block';
-            document.getElementById('user-mail').innerText = email;
+            if (snap.exists()) {
+                const datos = snap.val();
+                const estado = (datos.estado || "pendiente").toLowerCase();
+                const container = document.getElementById('already-registered');
+                const statusBox = document.getElementById('status-container');
+                const icon = document.getElementById('status-icon');
+                const title = document.getElementById('status-title');
+                const desc = document.getElementById('status-desc');
+                const label = document.getElementById('reg-status-label');
+                const retry = document.getElementById('retry-container');
 
-            db.ref('whitelist').once('value', snapshot => {
-                const whitelist = snapshot.val() || {};
-                let userPermission = null;
+                container.classList.remove('hidden');
+                label.innerText = "ESTADO: " + estado.toUpperCase();
 
-                // Admins directos por código
-                if(email === "rojjosue@gmail.com" || email === "josuerojas@gmail.com") userPermission = "admin";
-                
-                // Buscar en la lista de la base de datos
-                for(let key in whitelist) {
-                    if(whitelist[key].email === email) userPermission = whitelist[key].role;
-                }
-
-                if (userPermission === "admin") {
-                    isEditor = true;
-                    document.getElementById('user-role').innerText = "[ADMIN]";
-                    document.getElementById('user-role').style.color = "var(--color-blue)";
-                    document.getElementById('admin-nav').style.display = 'flex';
-                    escucharUsuarios();
+                if (estado === 'rechazado') {
+                    statusBox.className = "rechazado-box";
+                    icon.innerText = "✖";
+                    icon.style.color = "var(--danger)";
+                    title.innerText = "RECHAZADO";
+                    title.style.color = "var(--danger)";
+                    desc.innerText = "Tu registro no fue aprobado.";
+                    retry.classList.remove('hidden');
                 } else {
-                    isEditor = false;
-                    document.getElementById('user-role').innerText = "[JUGADOR]";
-                    document.getElementById('user-role').style.color = "#8b9bb4";
-                    document.getElementById('admin-nav').style.display = 'none';
+                    statusBox.style.border = "1px solid var(--success)";
+                    icon.innerText = "✅";
+                    icon.style.color = "var(--success)";
+                    title.innerText = "¡Ya estás registrado!";
+                    desc.innerText = "Tu solicitud está en revisión.";
+                    label.style.color = "var(--color-blue)";
+                    retry.classList.add('hidden');
                 }
-
-                escucharInscripciones();
-            });
+            } else {
+                document.getElementById('form-section').classList.remove('hidden');
+                document.getElementById('playerName').value = user.displayName || "";
+                configurarPrecios();
+            }
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('already-registered').classList.add('hidden');
         }
     });
 
-    function switchTab(tabId, el) {
-        document.querySelectorAll('.section-panel').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        el.classList.add('active');
+    async function reintentarRegistro() {
+        if (confirm("¿Deseas eliminar el registro rechazado e intentar de nuevo?")) {
+            await firebase.database().ref('inscripciones/' + currentUID).remove();
+            location.reload();
+        }
     }
 
-    function escucharInscripciones() {
-        db.ref('inscripciones').on('value', snapshot => {
-            rawData = snapshot.val() || {};
-            actualizarFiltroEquipos();
-            filtrarYMostrar();
-        });
+    function updateLogic() {
+        const t = document.getElementById('team1').value;
+        const r = document.getElementById('role1').value;
+        const container = document.getElementById('extra-container');
+        container.innerHTML = ""; extraCount = 0; selectedGoleros = []; selectedTeams = [];
+        if (!t || !r) return;
+        
+        selectedTeams.push(t);
+        let hasPlayerRole = (r === "Jugador" || r.includes("(A)") || r.includes("(C)"));
+        if (r.includes("Golero")) selectedGoleros.push(r);
+
+        const nextType = hasPlayerRole ? "onlyGolero" : "both";
+        addExtraRole(hasPlayerRole ? "¿Quieres ser Golero en otro equipo?" : "¿Deseas otro registro (Jugador o Golero)?", nextType);
     }
 
-    function filtrarYMostrar() {
-        const searchName = document.getElementById('search-player').value.toLowerCase();
-        const selectedTeam = document.getElementById('filter-team').value;
-        const tbody = document.getElementById('main-table');
-        tbody.innerHTML = "";
-        let count = 0, money = 0;
+    function addExtraRole(labelTxt, type) {
+        extraCount++;
+        const teams = ["Lobos", "Thunderfast", "Tejones", "Tcp", "Usb"].filter(t => !selectedTeams.includes(t));
+        const goleros = ["Golero 1", "Golero 2", "Golero 3"].filter(g => !selectedGoleros.includes(g));
+        
+        if (teams.length === 0) return;
+        
+        let options = '<option value="">Seleccionar Modalidad</option>';
+        if (type === "both") options += '<option value="Jugador">Jugador</option>';
+        goleros.forEach(g => { options += `<option value="${g}">${g}</option>`; });
 
-        for (let id in rawData) {
-            const r = rawData[id];
-            const rolesTxt = r.roles ? r.roles.map(x => `${x.team} (${x.role})`).join(', ') : `${r.teamName} (${r.role})`;
-            if (r.jugadorName.toLowerCase().includes(searchName) && (selectedTeam === "" || rolesTxt.includes(selectedTeam))) {
-                count++;
-                if (r.estado === "approved") money += 1200;
-                let badgeClass = r.estado === 'approved' ? 'badge-approved' : (r.estado === 'rechazado' ? 'badge-rechazado' : 'badge-pending');
-                let textoEstado = r.estado === 'rechazado' ? 'RECHAZADO' : (r.estado || 'pendiente').toUpperCase();
-                
-                // Botones solo para administradores
-                let acciones = isEditor ? `
-                    <button class="btn-action btn-ok" onclick="actualizarEstado('${id}', 'approved')">OK</button>
-                    <button class="btn-action btn-no" onclick="actualizarEstado('${id}', 'rechazado')">X</button>
-                    <button class="btn-action btn-edit" onclick="abrirModalEdicion('${id}')">✎</button>
-                ` : `<small style="color:#555">Solo lectura</small>`;
+        const div = document.createElement('div');
+        div.className = "extra-section";
+        div.innerHTML = `
+            <label style="cursor:pointer; font-size:0.85rem; display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <input type="checkbox" onchange="toggleDiv(this, 'fields_${extraCount}')"> <span>${labelTxt}</span>
+            </label>
+            <div id="fields_${extraCount}" class="hidden">
+                <select class="input-field extra-team" id="team_extra_${extraCount}">
+                    <option value="">Seleccionar Equipo</option>${teams.map(t => `<option value="${t}">${t}</option>`).join('')}
+                </select>
+                <select class="input-field extra-role" onchange="handleSelection(this, '${extraCount}')">
+                    ${options}
+                </select>
+            </div>`;
+        document.getElementById('extra-container').appendChild(div);
+    }
 
-                tbody.innerHTML += `<tr>
-                    <td><img src="${r.fotoCarnet}" class="foto-mini" onclick="abrirVisor('${r.fotoCarnet}')"><img src="${r.fotoPago}" class="foto-mini" onclick="abrirVisor('${r.fotoPago}')"></td>
-                    <td><strong>${r.jugadorName}</strong> <span style="color:var(--color-blue)">#${r.shirtNum || 'S/N'}</span><br><small>${r.whatsapp || ''}</small></td>
-                    <td><small>${rolesTxt.replace(/, /g, '<br>')}</small></td>
-                    <td><span class="badge ${badgeClass}">${textoEstado}</span></td>
-                    <td>${acciones}</td>
-                </tr>`;
+    function toggleDiv(cb, id) { document.getElementById(id).classList.toggle('hidden', !cb.checked); }
+
+    function handleSelection(sel, idx) {
+        const tVal = document.getElementById(`team_extra_${idx}`).value;
+        if (!sel.value || !tVal) { alert("Selecciona equipo y rol."); sel.value = ""; return; }
+        
+        selectedTeams.push(tVal);
+        if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
+
+        const allRoles = [document.getElementById('role1').value];
+        document.querySelectorAll('.extra-role').forEach(s => { if(s.value) allRoles.push(s.value); });
+        const alreadyHasPlayer = allRoles.some(r => r === "Jugador" || r.includes("(A)") || r.includes("(C)"));
+
+        if (selectedTeams.length < 5) {
+            if (alreadyHasPlayer) {
+                if (selectedGoleros.length < 3) {
+                    addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
+                }
+            } else {
+                addExtraRole("¿Deseas agregar otro registro (Jugador o Golero)?", "both");
             }
         }
-        document.getElementById('count-j').innerText = count;
-        document.getElementById('count-m').innerText = "$ " + money.toLocaleString();
     }
 
-    function escucharUsuarios() {
-        db.ref('whitelist').on('value', snapshot => {
-            usersData = snapshot.val() || {};
-            const tbody = document.getElementById('users-table');
-            tbody.innerHTML = "";
-            for(let id in usersData) {
-                tbody.innerHTML += `<tr>
-                    <td>${usersData[id].email}</td>
-                    <td><span class="badge ${usersData[id].role === 'admin' ? 'badge-approved' : 'badge-pending'}">${usersData[id].role.toUpperCase()}</span></td>
-                    <td><button class="btn-action btn-del" onclick="eliminarUsuario('${id}')">Quitar</button></td>
-                </tr>`;
-            }
-        });
+    function validatePhone() {
+        const pattern = /^09\d{7}$/;
+        const input = document.getElementById('whatsapp');
+        const isValid = input.value === "" || pattern.test(input.value);
+        document.getElementById('phone-error').style.display = isValid ? 'none' : 'block';
+        return isValid;
     }
 
-    function agregarUsuario() {
-        const email = document.getElementById('new-user-email').value.toLowerCase().trim();
-        const role = document.getElementById('new-user-role').value;
-        if(!email.includes("@")) return alert("Email inválido");
-        db.ref('whitelist').push({ email, role }).then(() => {
-            document.getElementById('new-user-email').value = "";
-            alert("Usuario agregado.");
-        });
-    }
-
-    function eliminarUsuario(id) {
-        if(confirm("¿Quitar acceso?")) db.ref('whitelist/' + id).remove();
-    }
-
-    function abrirVisor(url) { document.getElementById('modal-img').src = url; document.getElementById('modal-visor').style.display = 'flex'; }
-    
-    function actualizarFiltroEquipos() {
-        const select = document.getElementById('filter-team');
-        const equipos = new Set();
-        for (let id in rawData) {
-            const r = rawData[id];
-            if(r.roles) r.roles.forEach(role => equipos.add(role.team));
-            else if(r.teamName) equipos.add(r.teamName);
+    function configurarPrecios() {
+        const ahora = new Date();
+        const box = document.getElementById('status-pago');
+        if (ahora.getMonth() > 3 || (ahora.getMonth() === 3 && ahora.getDate() >= 15)) { 
+            box.innerHTML = "MONTO: $1.500"; box.className = "precio-box fuera-fecha";
+        } else {
+            box.innerHTML = "MONTO: $1.200"; box.className = "precio-box en-fecha";
         }
-        const val = select.value;
-        select.innerHTML = '<option value="">Todos los Equipos</option>';
-        Array.from(equipos).sort().forEach(eq => select.innerHTML += `<option value="${eq}" ${val === eq ? 'selected' : ''}>${eq}</option>`);
     }
 
-    function abrirModalEdicion(id) {
-        const r = rawData[id];
-        document.getElementById('edit-id').value = id;
-        document.getElementById('edit-name').value = r.jugadorName || "";
-        document.getElementById('edit-whatsapp').value = r.whatsapp || "";
-        document.getElementById('edit-shirt').value = r.shirtNum || "";
-        document.getElementById('edit-team').value = r.teamName || (r.roles ? r.roles[0].team : "");
-        document.getElementById('edit-role').value = r.role || (r.roles ? r.roles[0].role : "");
-        document.getElementById('edit-status').value = r.estado || "pending";
-        document.getElementById('modal-edit').style.display = 'flex';
-    }
-
-    function cerrarModalEdicion() { document.getElementById('modal-edit').style.display = 'none'; }
-
-    function guardarEdicion() {
-        const id = document.getElementById('edit-id').value;
-        const upd = {
-            jugadorName: document.getElementById('edit-name').value,
-            whatsapp: document.getElementById('edit-whatsapp').value,
-            shirtNum: document.getElementById('edit-shirt').value,
-            teamName: document.getElementById('edit-team').value,
-            role: document.getElementById('edit-role').value,
-            estado: document.getElementById('edit-status').value
+    const resizeImg = (file) => new Promise((res) => {
+        const r = new FileReader(); r.readAsDataURL(file);
+        r.onload = (e) => {
+            const i = new Image(); i.src = e.target.result;
+            i.onload = () => {
+                const c = document.createElement('canvas'); const max = 500;
+                let w = i.width, h = i.height;
+                if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
+                c.width = w; c.height = h; c.getContext('2d').drawImage(i, 0, 0, w, h);
+                res(c.toDataURL('image/jpeg', 0.7));
+            };
         };
-        db.ref('inscripciones/' + id).update(upd).then(() => cerrarModalEdicion());
-    }
+    });
 
-    function actualizarEstado(id, estado) {
-        if(confirm("¿Cambiar estado?")) db.ref('inscripciones/' + id).update({ estado: estado });
-    }
+    async function registrar(e) {
+        e.preventDefault(); if (!validatePhone()) return;
+        const btn = document.getElementById('btn-envio'); btn.disabled = true; btn.innerText = "ENVIANDO...";
+        try {
+            const fC = await resizeImg(document.getElementById('f1').files[0]);
+            const fP = await resizeImg(document.getElementById('f2').files[0]);
+            const nroCamiseta = document.getElementById('shirt1').value;
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: nroCamiseta }];
 
-    function exportarCSV() {
-        let csv = "Jugador,#,WhatsApp,Equipos,Estado\n";
-        for (let id in rawData) {
-            const r = rawData[id];
-            const est = r.estado === 'rechazado' ? 'RECHAZADO' : (r.estado || 'PENDIENTE').toUpperCase();
-            csv += `"${r.jugadorName}","${r.shirtNum || ''}","${r.whatsapp || ''}","${r.teamName || ''}","${est}"\n`;
-        }
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "reporte_uerh.csv";
-        link.click();
+            document.querySelectorAll('.extra-section').forEach(s => {
+                const cb = s.querySelector('input[type="checkbox"]');
+                if(cb && cb.checked) {
+                    const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: nroCamiseta });
+                }
+            });
+
+            const misDatos = {
+                jugadorName: document.getElementById('playerName').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                email: currentEmail,
+                shirtNum: nroCamiseta,
+                roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente"
+            };
+
+            await firebase.database().ref('inscripciones/' + currentUID).set(misDatos);
+            avisarNuevoRegistro(misDatos);
+            alert("✅ Registro completo."); location.reload();
+        } catch (err) { alert("Error: " + err.message); btn.disabled = false; }
     }
 </script>
 </body>
