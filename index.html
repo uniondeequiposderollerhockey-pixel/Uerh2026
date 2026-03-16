@@ -159,20 +159,29 @@
     let currentEmail = null;
     const ADMIN_EMAILS = ['rojjosue@gmail.com', 'uniondeequiposderollerhockey@gmail.com'];
 
-    // 1. MEJORA DE LOGIN CON PERSISTENCIA Y REDIRECT
+    // Capturar resultado de redirección inmediatamente al cargar
+    window.onload = async () => {
+        try {
+            await firebase.auth().getRedirectResult();
+        } catch (error) {
+            console.error("Error redirect:", error);
+        }
+    };
+
     async function login() {
         const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         try {
+            // Persistencia LOCAL para que no se cierre la sesión sola
             await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
             await firebase.auth().signInWithRedirect(provider);
         } catch (error) {
-            alert("Error en autenticación: " + error.message);
+            alert("Error: " + error.message);
         }
     }
 
     function handleLogout() { firebase.auth().signOut().then(() => location.reload()); }
 
-    // 2. DETECCIÓN DE ESTADO DE SESIÓN
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
             currentUID = user.uid; 
@@ -180,14 +189,16 @@
             document.getElementById('auth-section').classList.add('hidden');
             
             const isAdmin = ADMIN_EMAILS.includes(currentEmail);
-            const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
+            // Consultar base de datos para ver si ya existe registro
+            const snap = await firebase.database().ref('inscripciones/' + user.uid).once('value');
             
-            // Si es ADMIN, siempre va al formulario. Si no, chequea si ya existe.
+            // Si es ADMIN puede entrar siempre, si no, se bloquea si ya existe registro
             if (snap.exists() && !isAdmin) {
                 mostrarEstadoRegistro(snap.val());
             } else {
                 document.getElementById('form-section').classList.remove('hidden');
                 document.getElementById('already-registered').classList.add('hidden');
+                // Si es admin, limpia el nombre para permitir registrar a otros
                 document.getElementById('playerName').value = isAdmin ? "" : (user.displayName || "");
                 configurarPrecios();
             }
@@ -226,8 +237,6 @@
             retry.classList.add('hidden');
         }
     }
-
-    // --- FUNCIONES DE REGISTRO Y LÓGICA (MANTENIDAS) ---
 
     function avisarNuevoRegistro(datos) {
         const urlMake = "https://hook.us2.make.com/tnzwhobq9ir8syhbi3ckv0jyskenmefx";
@@ -351,13 +360,14 @@
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
-            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: document.getElementById('shirt1').value }];
+            const nro = document.getElementById('shirt1').value;
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: nro }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
                 const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) {
                     const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirtNum: document.getElementById('shirt1').value });
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: nro });
                 }
             });
 
@@ -365,12 +375,12 @@
                 jugadorName: document.getElementById('playerName').value,
                 whatsapp: document.getElementById('whatsapp').value,
                 email: currentEmail,
-                shirtNum: document.getElementById('shirt1').value,
+                shirtNum: nro,
                 roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente",
                 fechaRegistro: new Date().toISOString()
             };
 
-            // RUTA DE GUARDADO: Si es ADMIN usa ID único para no pisar registros
+            // Los administradores guardan con ID único para permitir registros múltiples
             let path = 'inscripciones/' + currentUID;
             if (ADMIN_EMAILS.includes(currentEmail)) {
                 path = 'inscripciones/' + currentUID + "_" + Date.now();
