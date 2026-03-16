@@ -71,7 +71,7 @@
 
     <div id="auth-section" class="card">
         <h2 style="font-size: 1.1rem; margin-bottom: 20px;">Portal de Registro 2026</h2>
-        <button class="btn-google" onclick="login()">
+        <button class="btn-google" id="btn-login-google" onclick="login()">
             <img src="https://www.google.com/favicon.ico" width="16"> Continuar con Google
         </button>
     </div>
@@ -159,25 +159,37 @@
     let currentEmail = null;
     const ADMIN_EMAILS = ['rojjosue@gmail.com', 'uniondeequiposderollerhockey@gmail.com'];
 
-    // Capturar cualquier resultado pendiente al cargar la página
+    // Al cargar, capturar resultados de cualquier método de login
     window.onload = async () => {
         try {
             await firebase.auth().getRedirectResult();
         } catch (error) {
-            console.error("Error al cargar sesión:", error);
+            console.error("Error al recuperar sesión:", error);
         }
     };
 
     async function login() {
+        const btn = document.getElementById('btn-login-google');
+        btn.disabled = true;
+        btn.innerText = "Cargando...";
+
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
+        
         try {
             await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            // Usamos Popup para evitar el rebote del video
+            // Intentar Popup, si falla por cierre de usuario, no hace nada
             await firebase.auth().signInWithPopup(provider);
         } catch (error) {
-            console.error("Error en login:", error);
-            alert("Error: " + error.message);
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                console.log("Popup cerrado, intentando redirección...");
+                // Si el popup falló o se cerró, forzar redirección para asegurar entrada
+                await firebase.auth().signInWithRedirect(provider);
+            } else {
+                alert("Error: " + error.message);
+                btn.disabled = false;
+                btn.innerHTML = '<img src="https://www.google.com/favicon.ico" width="16"> Continuar con Google';
+            }
         }
     }
 
@@ -190,7 +202,6 @@
             document.getElementById('auth-section').classList.add('hidden');
             
             const isAdmin = ADMIN_EMAILS.includes(currentEmail);
-            // Usamos once para asegurar que la lectura sea inmediata
             const snap = await firebase.database().ref('inscripciones/' + user.uid).once('value');
             
             if (snap.exists() && !isAdmin) {
@@ -359,13 +370,14 @@
         try {
             const fC = await resizeImg(document.getElementById('f1').files[0]);
             const fP = await resizeImg(document.getElementById('f2').files[0]);
-            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: document.getElementById('shirt1').value }];
+            const nroCamiseta = document.getElementById('shirt1').value;
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: nroCamiseta }];
 
             document.querySelectorAll('.extra-section').forEach(s => {
                 const cb = s.querySelector('input[type="checkbox"]');
                 if(cb && cb.checked) {
                     const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
-                    if(t && r) roles.push({ team: t, role: r, shirtNum: document.getElementById('shirt1').value });
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: nroCamiseta });
                 }
             });
 
@@ -373,7 +385,7 @@
                 jugadorName: document.getElementById('playerName').value,
                 whatsapp: document.getElementById('whatsapp').value,
                 email: currentEmail,
-                shirtNum: document.getElementById('shirt1').value,
+                shirtNum: nroCamiseta,
                 roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente",
                 fechaRegistro: new Date().toISOString()
             };
