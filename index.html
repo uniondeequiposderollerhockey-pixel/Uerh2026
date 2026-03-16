@@ -104,7 +104,7 @@
         </div>
 
         <form id="regForm" onsubmit="registrar(event)">
-            <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo" required>
+            <input type="text" id="playerName" class="input-field" placeholder="Nombre Completo del Jugador" required>
             <input type="tel" id="whatsapp" class="input-field" placeholder="WhatsApp (Ej: 095555555)" required oninput="validatePhone()">
             <div id="phone-error" class="error-msg">Error: El formato debe ser 09XXXXXXX</div>
             
@@ -157,12 +157,77 @@
 
     let currentUID = null;
     let currentEmail = null;
-    let extraCount = 0; 
-    let selectedGoleros = []; 
-    let selectedTeams = [];
-
-    // Lista de administradores autorizados para registros múltiples
     const ADMIN_EMAILS = ['rojjosue@gmail.com', 'uniondeequiposderollerhockey@gmail.com'];
+
+    // 1. MEJORA DE LOGIN CON PERSISTENCIA Y REDIRECT
+    async function login() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+            await firebase.auth().signInWithRedirect(provider);
+        } catch (error) {
+            alert("Error en autenticación: " + error.message);
+        }
+    }
+
+    function handleLogout() { firebase.auth().signOut().then(() => location.reload()); }
+
+    // 2. DETECCIÓN DE ESTADO DE SESIÓN
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            currentUID = user.uid; 
+            currentEmail = user.email.toLowerCase();
+            document.getElementById('auth-section').classList.add('hidden');
+            
+            const isAdmin = ADMIN_EMAILS.includes(currentEmail);
+            const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
+            
+            // Si es ADMIN, siempre va al formulario. Si no, chequea si ya existe.
+            if (snap.exists() && !isAdmin) {
+                mostrarEstadoRegistro(snap.val());
+            } else {
+                document.getElementById('form-section').classList.remove('hidden');
+                document.getElementById('already-registered').classList.add('hidden');
+                document.getElementById('playerName').value = isAdmin ? "" : (user.displayName || "");
+                configurarPrecios();
+            }
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('form-section').classList.add('hidden');
+            document.getElementById('already-registered').classList.add('hidden');
+        }
+    });
+
+    function mostrarEstadoRegistro(datos) {
+        const estado = (datos.estado || "pendiente").toLowerCase();
+        const container = document.getElementById('already-registered');
+        const statusBox = document.getElementById('status-container');
+        const icon = document.getElementById('status-icon');
+        const title = document.getElementById('status-title');
+        const desc = document.getElementById('status-desc');
+        const label = document.getElementById('reg-status-label');
+        const retry = document.getElementById('retry-container');
+
+        container.classList.remove('hidden');
+        label.innerText = "ESTADO: " + estado.toUpperCase();
+
+        if (estado === 'rechazado') {
+            statusBox.className = "rechazado-box";
+            icon.innerText = "✖"; icon.style.color = "var(--danger)";
+            title.innerText = "RECHAZADO"; title.style.color = "var(--danger)";
+            desc.innerText = "Tu registro no fue aprobado.";
+            retry.classList.remove('hidden');
+        } else {
+            statusBox.style.border = "1px solid var(--success)";
+            icon.innerText = "✅"; icon.style.color = "var(--success)";
+            title.innerText = "¡Ya estás registrado!";
+            desc.innerText = "Tu solicitud está en revisión.";
+            label.style.color = "var(--color-blue)";
+            retry.classList.add('hidden');
+        }
+    }
+
+    // --- FUNCIONES DE REGISTRO Y LÓGICA (MANTENIDAS) ---
 
     function avisarNuevoRegistro(datos) {
         const urlMake = "https://hook.us2.make.com/tnzwhobq9ir8syhbi3ckv0jyskenmefx";
@@ -178,71 +243,6 @@
         }).catch(err => console.error("Error Make:", err));
     }
 
-    async function login() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        // Usamos Redirect en lugar de Popup para mayor estabilidad
-        await firebase.auth().signInWithRedirect(provider);
-    }
-
-    function handleLogout() { firebase.auth().signOut().then(() => location.reload()); }
-
-    firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-            currentUID = user.uid; 
-            currentEmail = user.email.toLowerCase();
-            document.getElementById('auth-section').classList.add('hidden');
-            
-            const isAdmin = ADMIN_EMAILS.includes(currentEmail);
-            const snap = await firebase.database().ref('inscripciones/' + user.uid).get();
-            
-            // Si el usuario ya existe Y NO es administrador, mostramos pantalla de estado
-            if (snap.exists() && !isAdmin) {
-                const datos = snap.val();
-                const estado = (datos.estado || "pendiente").toLowerCase();
-                const container = document.getElementById('already-registered');
-                const statusBox = document.getElementById('status-container');
-                const icon = document.getElementById('status-icon');
-                const title = document.getElementById('status-title');
-                const desc = document.getElementById('status-desc');
-                const label = document.getElementById('reg-status-label');
-                const retry = document.getElementById('retry-container');
-
-                container.classList.remove('hidden');
-                label.innerText = "ESTADO: " + estado.toUpperCase();
-
-                if (estado === 'rechazado') {
-                    statusBox.className = "rechazado-box";
-                    icon.innerText = "✖";
-                    icon.style.color = "var(--danger)";
-                    title.innerText = "RECHAZADO";
-                    title.style.color = "var(--danger)";
-                    desc.innerText = "Tu registro no fue aprobado.";
-                    retry.classList.remove('hidden');
-                } else {
-                    statusBox.style.border = "1px solid var(--success)";
-                    icon.innerText = "✅";
-                    icon.style.color = "var(--success)";
-                    title.innerText = "¡Ya estás registrado!";
-                    desc.innerText = "Tu solicitud está en revisión.";
-                    label.style.color = "var(--color-blue)";
-                    retry.classList.add('hidden');
-                }
-            } else {
-                // Si es nuevo O es ADMIN, mostramos el formulario
-                document.getElementById('form-section').classList.remove('hidden');
-                document.getElementById('already-registered').classList.add('hidden');
-                
-                // Si es admin, dejamos el nombre vacío para llenar el del jugador
-                document.getElementById('playerName').value = isAdmin ? "" : (user.displayName || "");
-                configurarPrecios();
-            }
-        } else {
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('form-section').classList.add('hidden');
-            document.getElementById('already-registered').classList.add('hidden');
-        }
-    });
-
     async function reintentarRegistro() {
         if (confirm("¿Deseas eliminar el registro rechazado e intentar de nuevo?")) {
             await firebase.database().ref('inscripciones/' + currentUID).remove();
@@ -250,7 +250,8 @@
         }
     }
 
-    // --- Lógica de roles y equipos (se mantiene según tu original) ---
+    let extraCount = 0; let selectedGoleros = []; let selectedTeams = [];
+
     function updateLogic() {
         const t = document.getElementById('team1').value;
         const r = document.getElementById('role1').value;
@@ -270,7 +271,6 @@
         extraCount++;
         const teams = ["Lobos", "Thunderfast", "Tejones", "Tcp", "Usb"].filter(t => !selectedTeams.includes(t));
         const goleros = ["Golero 1", "Golero 2", "Golero 3"].filter(g => !selectedGoleros.includes(g));
-        
         if (teams.length === 0) return;
         
         let options = '<option value="">Seleccionar Modalidad</option>';
@@ -299,21 +299,16 @@
     function handleSelection(sel, idx) {
         const tVal = document.getElementById(`team_extra_${idx}`).value;
         if (!sel.value || !tVal) { alert("Selecciona equipo y rol."); sel.value = ""; return; }
-        
         selectedTeams.push(tVal);
         if (sel.value.includes("Golero")) selectedGoleros.push(sel.value);
-
         const allRoles = [document.getElementById('role1').value];
         document.querySelectorAll('.extra-role').forEach(s => { if(s.value) allRoles.push(s.value); });
         const alreadyHasPlayer = allRoles.some(r => r === "Jugador" || r.includes("(A)") || r.includes("(C)"));
-
         if (selectedTeams.length < 5) {
             if (alreadyHasPlayer) {
-                if (selectedGoleros.length < 3) {
-                    addExtraRole("¿Quieres registrarte como Golero en otro equipo?", "onlyGolero");
-                }
+                if (selectedGoleros.length < 3) addExtraRole("¿Quieres ser Golero en otro equipo?", "onlyGolero");
             } else {
-                addExtraRole("¿Deseas agregar otro registro (Jugador o Golero)?", "both");
+                addExtraRole("¿Deseas otro registro?", "both");
             }
         }
     }
@@ -352,4 +347,44 @@
 
     async function registrar(e) {
         e.preventDefault(); if (!validatePhone()) return;
-        const btn = document.getElementById('btn-envio'); btn.disabled = true; btn.innerText = "ENVI
+        const btn = document.getElementById('btn-envio'); btn.disabled = true; btn.innerText = "ENVIANDO...";
+        try {
+            const fC = await resizeImg(document.getElementById('f1').files[0]);
+            const fP = await resizeImg(document.getElementById('f2').files[0]);
+            const roles = [{ team: document.getElementById('team1').value, role: document.getElementById('role1').value, shirtNum: document.getElementById('shirt1').value }];
+
+            document.querySelectorAll('.extra-section').forEach(s => {
+                const cb = s.querySelector('input[type="checkbox"]');
+                if(cb && cb.checked) {
+                    const t = s.querySelector('.extra-team').value; const r = s.querySelector('.extra-role').value;
+                    if(t && r) roles.push({ team: t, role: r, shirtNum: document.getElementById('shirt1').value });
+                }
+            });
+
+            const misDatos = {
+                jugadorName: document.getElementById('playerName').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                email: currentEmail,
+                shirtNum: document.getElementById('shirt1').value,
+                roles: roles, fotoCarnet: fC, fotoPago: fP, estado: "pendiente",
+                fechaRegistro: new Date().toISOString()
+            };
+
+            // RUTA DE GUARDADO: Si es ADMIN usa ID único para no pisar registros
+            let path = 'inscripciones/' + currentUID;
+            if (ADMIN_EMAILS.includes(currentEmail)) {
+                path = 'inscripciones/' + currentUID + "_" + Date.now();
+            }
+
+            await firebase.database().ref(path).set(misDatos);
+            avisarNuevoRegistro(misDatos);
+            alert("✅ Registro exitoso."); 
+            location.reload();
+        } catch (err) { 
+            alert("Error: " + err.message); 
+            btn.disabled = false; btn.innerText = "Enviar Registro";
+        }
+    }
+</script>
+</body>
+</html>
